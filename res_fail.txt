@@ -1,0 +1,439 @@
+[SUMP DEBUG] ump init start...
+[SUMP DEBUG] real_spdk_bdev_register = 0x7f075e55aac0.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 7b4290c5-d070-442f-bb0f-0a8236665e82
+[SUMP DEBUG] name of the new bdev: Malloc0n1
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+[SUMP DEBUG] Malloc0n1's io channel is added
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c4b1be70, name:Malloc0n1
+turn:0
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c4b1be70, name:Malloc0n1
+turn:1
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] create new mbdev(ump-bdev-7b4290c5-d070-442f-bb0f-0a8236665e82) success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+put_io_channel
+put_io_channel:name:blobstore
+put_io_channel
+put_io_channel:name:bdev_ump-bdev-7b4290c5-d070-442f-bb0f-0a8236665e82
+put_io_channel
+put_io_channel:name:ump-bdev-7b4290c5-d070-442f-bb0f-0a8236665e82
+ump_bdev_channel_destroy_cb
+[SUMP DEBUG] Malloc0n1's io channel is removed
+put_io_channel
+put_io_channel:name:bdev_mgr
+put_io_channel
+put_io_channel:name:Malloc0n1
+put_io_channel
+put_io_channel:name:Malloc0
+put_io_channel
+put_io_channel:name:nvme_poll_groups
+put_io_channel
+put_io_channel:name:accel
+put_io_channel
+put_io_channel:name:iobuf
+put_io_channel
+put_io_channel:name:sw_accel_module
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 7b4290c5-d070-442f-bb0f-0a8236665e82
+[SUMP DEBUG] name of the new bdev: Malloc1n1
+[SUMP DEBUG] mbdev(ump-bdev-7b4290c5-d070-442f-bb0f-0a8236665e82) add new bdev success.
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+[SUMP DEBUG] Malloc0n1's io channel is added
+[SUMP DEBUG] Malloc1n1's io channel is added
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:2
+[SUMP DEBUG] Malloc0n1's IO channel is chosen
+[SUMP DEBUG] before bdev->fn_table->submit_request
+[SUMP DEBUG] after bdev->fn_table->submit_request
+
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] io complete success.
+[SUMP DEBUG] ump_bdev_submit_request
+[SUMP DEBUG] iopath addr:0x5569c497f5c0, name:Malloc0n1
+[SUMP DEBUG] iopath addr:0x5569c497ef70, name:Malloc1n1
+turn:1
+[SUMP DEBUG] Malloc1n1's IO channel is chosen
+[SUMP DEBUG
