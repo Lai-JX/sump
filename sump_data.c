@@ -1,17 +1,5 @@
 #include "sump.h"
 
-/***********************************************************************
- *******************************spdk函数劫持****************************
- ***********************************************************************/
-
-/* 最先执行的函数，先获取到真正注册函数的函数指针 */
-void __attribute__((constructor)) ump_init(void)
-{
-    sump_printf("ump init start...\n");
-    real_spdk_bdev_register = dlsym(RTLD_NEXT, "spdk_bdev_register");
-    sump_printf("real_spdk_bdev_register = %p.\n", real_spdk_bdev_register);
-    // printf("%s\n",dlerror());
-}
 
 /* 获取 I/O channel */
 struct spdk_io_channel *ump_bdev_get_io_channel(void *ctx)
@@ -70,6 +58,7 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
     /* 设置路径 */
     ump_completion_ctx->iopath = iopath;
     bdev = iopath->bdev;
+    // bdev_io->internal.ch->channel = iopath->io_channel;
     sump_printf("before bdev->fn_table->submit_request\n");
     /* 提交I/O请求 */
     bdev->fn_table->submit_request(iopath->io_channel, bdev_io);

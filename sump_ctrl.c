@@ -1,7 +1,6 @@
 #include "sump.h"
 
 
-
 /*************************************************************************/
 /***************************io channel begin*****************************/
 /*************************************************************************/
@@ -33,12 +32,16 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
         struct ump_bdev_iopath *iopath = completion_ctx->iopath;
         struct ump_bdev_channel *ump_channel = spdk_io_channel_get_ctx(ch);
 
+        printf("addr0!!!:%p\n", ch);
+
+        // TAILQ_REMOVE(&ump_channel->iopath_list, iopath, tailq);
+        // spdk_put_io_channel(iopath->io_channel);
+        // free(iopath);
+        iopath->available = false;
+        // 轮询是否重连
+        // ump_failback(iopath, bdev_io, ump_channel);
+
         memcpy(ump_channel, &completion_ctx->ump_channel, sizeof(struct ump_bdev_channel));
-
-
-        TAILQ_REMOVE(&ump_channel->iopath_list, iopath, tailq);
-        spdk_put_io_channel(iopath->io_channel);
-        free(iopath);
 
         // sd
         // ljx:重新请求
@@ -65,18 +68,43 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
 {
     // sd
     static int turn = 0;
-    struct ump_bdev_iopath *iopath;
+    struct ump_bdev_iopath *iopath, *iopath1, *iopath2;
+    // iopath1 = (struct ump_bdev_iopath *)((&ump_channel->iopath_list)->tqh_last);
+    // if (iopath1)
+    // {
+    //     sump_printf("last iopath addr1:%p, name:%s\n", iopath1, iopath1->bdev->name);
+    //     iopath2 = (struct ump_bdev_iopath *)(iopath1->tailq.tqe_prev);
+    //     // if(iopath2->bdev > 0x100000000000)
+    //     // {
+    //     //     sump_printf("iopath addr2:%p, name:%s\n", iopath2, iopath2->bdev->name);
+    //     // }
+    // }
+    // else
+    // {
+    //     sump_printf("last iopath1 empty\n");
+    // }
 
     if (TAILQ_EMPTY(&ump_channel->iopath_list))
     {
         sump_printf("TAILQ_EMPTY\n");
         return NULL;
     }
+    else
+    {
+        sump_printf("TAILQ_FOREACH\n");
+        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+        {
+            if (iopath)
+            {
+                sump_printf("iopath addr:%p, name:%s\n", iopath, iopath->bdev->name);
+            }
+        }
+    }
 
     int idx = 0;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
     {
-        if (idx == turn)
+        if (iopath->available && idx == turn)
         {
             turn++;
             sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
@@ -88,10 +116,17 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
         }
     }
     turn = 1;
-    iopath = TAILQ_FIRST(&ump_channel->iopath_list);
-    sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
-    return iopath;
-    // sd
+    // iopath = TAILQ_FIRST(&ump_channel->iopath_list);
+    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    {
+        if(!iopath->available)
+            turn++;
+        else
+        {
+            sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+            return iopath;
+        }
+    }
 }
 
 /********************************************************
@@ -135,6 +170,8 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
     // ljx: 添加if(TAILQ_EMPTY(&ump_bdev_manage.ump_bdev_list))
     // if (TAILQ_EMPTY(&ump_channel->iopath_list))
     TAILQ_INIT(&ump_channel->iopath_list); // 当前mbdev在当前线程的各条路径
+    TAILQ_INSERT_TAIL(&g_ump_bdev_channels, ump_channel, tailq);    // ljx
+    printf("add ump_channel\n");
     // 遍历mbdev的所有bdev
     TAILQ_FOREACH(list_bdev, &mbdev->spdk_bdev_list, tailq)
     {
@@ -157,6 +194,7 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
 
         iopath->io_channel = io_channel;
         iopath->bdev = bdev;
+        iopath->available = true;
         TAILQ_INSERT_TAIL(&ump_channel->iopath_list, iopath, tailq);
         sump_printf("%s's io channel is added\n", bdev->name);
     }
@@ -180,7 +218,8 @@ void ump_bdev_channel_destroy_cb(void *io_device, void *ctx_buf)
 {
     struct ump_bdev_channel *ump_channel = ctx_buf;
     printf("ump_bdev_channel_destroy_cb\n");
-
+    TAILQ_REMOVE(&g_ump_bdev_channels, ump_channel, tailq);
+    printf("remove ump_channel\n");
     ump_bdev_channel_clear_all_iopath(ump_channel);
 }
 
@@ -224,3 +263,100 @@ uint64_t ump_bdev_get_spin_time(struct spdk_io_channel *ch)
     sump_printf("ump_bdev_get_spin_time\n");
     return 0;
 }
+
+/*************************************************************************/
+/******************************failback begin*****************************/
+/*************************************************************************/
+
+void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io, struct ump_bdev_channel *ump_channel)
+{
+    sump_printf("ump_failback! bdev name:%s\n", iopath->bdev->name);
+    // 1. 创建线程
+    char thread_name[128];
+    sprintf(thread_name, "failback_%s", iopath->bdev->name);
+    struct spdk_cpuset tmp_cpumask = {};
+    spdk_cpuset_zero(&tmp_cpumask);
+    spdk_cpuset_set_cpu(&tmp_cpumask, 2, true);
+    struct spdk_thread *thread = spdk_thread_create(thread_name, &tmp_cpumask);
+
+    // 2. 启动线程
+    struct ump_failback_ctx *ump_failback_ctx = malloc(sizeof(struct ump_failback_ctx));
+    // ump_failback_ctx->bdev_io = malloc(sizeof(struct spdk_bdev_io));
+    // memcpy(ump_failback_ctx->bdev_io, bdev_io, sizeof(struct spdk_bdev_io));
+    ump_failback_ctx->bdev_io = bdev_io;
+    ump_failback_ctx->iopath = iopath;
+    ump_failback_ctx->thread = thread;
+    ump_failback_ctx->ump_channel = ump_channel;
+    ump_failback_ctx->tqh_first = ump_channel->iopath_list.tqh_first;
+    // ump_failback_ctx->addr = &ump_failback_ctx;
+    // spdk_spin_init(&ump_failback_ctx->lock);    // 初始化自旋锁
+    ump_failback_ctx->poller = spdk_poller_register(ump_failback_io_fn, (void *)ump_failback_ctx, 1000); // 每1000微秒试一下是否已经重连
+    // spdk_thread_send_msg(thread, ump_failback_io_fn, (void *)ump_failback_ctx);
+
+    return;
+err:
+    /* todo io complete */
+    return;
+}
+
+int ump_failback_io_fn(void *arg1)
+{
+    struct ump_failback_ctx *ump_failback_ctx = arg1;
+    struct ump_bdev_iopath *iopath = ump_failback_ctx->iopath;
+    struct spdk_bdev_io *bdev_io = ump_failback_ctx->bdev_io;
+    // printf("iopath:%p\n", iopath);
+    // printf("iopath->bdev:%p\n", iopath->bdev);
+    // printf("iopath->bdev->name:%p\n", iopath->bdev->name);
+    // sump_printf("ump_failback_io_fn! bdev name:%s\n", iopath->bdev->name);
+    bdev_io->internal.cb = ump_failback_io_completion_cb;
+    bdev_io->internal.caller_ctx = ump_failback_ctx;
+
+    /* 提交I/O请求 */
+    // bdev_io->internal.ch->channel = iopath->io_channel;
+    iopath->bdev->fn_table->submit_request(iopath->io_channel, bdev_io);
+
+    return 0;
+}
+
+void ump_failback_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
+{
+    struct ump_failback_ctx *ump_failback_ctx = cb_arg;
+    static bool flag = true;
+    if (flag && success)
+    {
+        printf("addr1!!!:%p\n", (bdev_io->internal.ch));
+        // printf("addr2!!!:%p\n", (bdev_io->internal.ch)->channel);
+        sump_printf("io reconnect success.\n");
+        // printf("ump_failback_ctx addr:%p\n", ump_failback_ctx);
+        // printf("ump_failback_ctx->thread addr:%p\n", ump_failback_ctx->thread);
+        
+        // spdk_spin_lock(&ump_failback_ctx->lock);
+        if (ump_failback_ctx)                           // 这里需要加锁，不然会double free （虽然不知道为什么）
+        {
+            ump_failback_ctx->iopath->available = true;
+            // struct ump_failback_ctx **addr_tmp = ump_failback_ctx->addr;
+            spdk_poller_pause(ump_failback_ctx->poller);
+            // spdk_poller_unregister(ump_failback_ctx->poller);
+            spdk_thread_exit(ump_failback_ctx->thread); // 退出当前线程
+            // spdk_spin_lock(&ump_failback_ctx->lock);
+            // spdk_spin_destroy(&ump_failback_ctx->lock);
+            // free(ump_failback_ctx->bdev_io);
+            free(ump_failback_ctx);
+            // *addr_tmp = NULL;
+        }
+        flag = false;
+    }
+    if (!success)
+    {
+        ump_failback_ctx->ump_channel->iopath_list.tqh_first = ump_failback_ctx->tqh_first;
+    }
+    // else
+    // {
+    //     sump_printf("io reconnect fail.\n");
+    // }
+    return;
+}
+
+/*************************************************************************/
+/******************************failback end*****************************/
+/*************************************************************************/

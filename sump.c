@@ -4,6 +4,65 @@
 struct ump_bdev_manage ump_bdev_manage;
 /* 全局变量，保存真正处理设备注册的函数指针 */
 int (*real_spdk_bdev_register)(struct spdk_bdev *bdev);
+/* 全局变量，劫持_bdev_nvme_reset_complete函数，用于实现failback */
+// void (*real__bdev_nvme_reset_complete)(struct spdk_io_channel_iter *i, int status);
+int (*real_spdk_nvme_ctrlr_reconnect_poll_async)(struct spdk_nvme_ctrlr *ctrlr);
+
+/***********************************************************************
+ *******************************spdk函数劫持****************************
+ ***********************************************************************/
+
+/* 最先执行的函数，先获取到真正注册函数的函数指针 */
+void __attribute__((constructor)) ump_init(void)
+{
+    sump_printf("ump init start...\n");
+    real_spdk_bdev_register = dlsym(RTLD_NEXT, "spdk_bdev_register");
+    real_spdk_nvme_ctrlr_reconnect_poll_async = dlsym(RTLD_NEXT, "spdk_nvme_ctrlr_reconnect_poll_async");
+    sump_printf("real_spdk_bdev_register = %p.\n", real_spdk_bdev_register);
+    sump_printf("real_spdk_nvme_ctrlr_reconnect_poll_async = %p.\n", real_spdk_nvme_ctrlr_reconnect_poll_async);
+    
+    TAILQ_INIT(&g_ump_bdev_channels); // ljx
+    printf("g_ump_bdev_iopaths:%p\n", &g_ump_bdev_channels);
+    // printf("%s\n",dlerror());
+}
+
+// void
+// _bdev_nvme_reset_complete(struct spdk_io_channel_iter *i, int status)
+// {
+//     printf("_bdev_nvme_reset_complete\n\n\n\n\n\n");
+// }
+int
+spdk_nvme_ctrlr_reconnect_poll_async(struct spdk_nvme_ctrlr *ctrlr)
+{
+    struct nvme_ctrlr *nvme_ctrlr = (struct nvme_ctrlr *)ctrlr;
+    if(nvme_ctrlr->size == sizeof(struct nvme_ctrlr))
+    {
+        int rc = real_spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);
+        if(rc == 0)
+        {
+            struct ump_bdev_iopath *iopath;
+            struct ump_bdev_channel *ch;
+            TAILQ_FOREACH(ch, &g_ump_bdev_channels, tailq)
+            {
+                TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
+                {
+                    printf("iopath->bdev->name:%s, nvme_ctrlr->nbdev_ctrlr->name:%s\n",iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name);
+                    if (!iopath->available && strstr(iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name))
+                    {
+                        printf("iopath %s reconnect successful!\n",iopath->bdev->name);
+                        iopath->available = true;
+                    }
+                }
+            }
+            printf("\nspdk_nvme_ctrlr_reconnect_poll_async:reset successfully\n\n");
+        }
+        return rc;
+    }
+    else
+    {
+        return real_spdk_nvme_ctrlr_reconnect_poll_async(ctrlr);
+    }
+}
 
 /********************************************************
 * Function name:    spdk_bdev_register

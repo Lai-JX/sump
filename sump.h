@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include <dlfcn.h>
 #include <spdk/bdev.h>
-#include "spdk/thread.h"
+#include <spdk/thread.h>
 #include <spdk/bdev_module.h>
 #include <spdk/string.h>
 #include <stdlib.h>
+#include "sump_nvme_ctrlr.h"
+
+
+// #include "spdk_internal/event.h"
 
 // TAILQ_HEAD 定义队列头
 // TAILQ_ENTRY 队列实体定义
@@ -16,6 +20,50 @@
 // TAILQ_EMPTY 检查队列是否为空
 // TAILQ_REMOVE 从队列中移除元素
 
+// 由于某些原因这里需要再定义一遍
+struct spdk_bdev_channel {
+	struct spdk_bdev	*bdev;
+
+	/* The channel for the underlying device */
+	struct spdk_io_channel	*channel;
+
+	/* Per io_device per thread data */
+	struct spdk_bdev_shared_resource *shared_resource;
+
+	struct spdk_bdev_io_stat *stat;
+
+	/*
+	 * Count of I/O submitted to the underlying dev module through this channel
+	 * and waiting for completion.
+	 */
+	uint64_t		io_outstanding;
+
+	/*
+	 * List of all submitted I/Os including I/O that are generated via splitting.
+	 */
+	bdev_io_tailq_t		io_submitted;
+
+	/*
+	 * List of spdk_bdev_io that are currently queued because they write to a locked
+	 * LBA range.
+	 */
+	bdev_io_tailq_t		io_locked;
+
+	uint32_t		flags;
+
+	struct spdk_histogram_data *histogram;
+
+#ifdef SPDK_CONFIG_VTUNE
+	uint64_t		start_tsc;
+	uint64_t		interval_tsc;
+	__itt_string_handle	*handle;
+	struct spdk_bdev_io_stat *prev_stat;
+#endif
+
+	bdev_io_tailq_t		queued_resets;
+
+	lba_range_tailq_t	locked_ranges;
+};
 
 
 /* 总的 ump_bdev 队列 */
@@ -42,21 +90,37 @@ struct spdk_list_bdev
     TAILQ_ENTRY(spdk_list_bdev)
     tailq;
 };
+// ljx
+enum bdev_nvme_multipath_policy {
+	BDEV_NVME_MP_POLICY_ACTIVE_PASSIVE,
+	BDEV_NVME_MP_POLICY_ACTIVE_ACTIVE,
+};
 
+enum bdev_nvme_multipath_selector {
+	BDEV_NVME_MP_SELECTOR_ROUND_ROBIN = 1,
+	BDEV_NVME_MP_SELECTOR_QUEUE_DEPTH,
+};
 /* iopath队列 */ 
 struct ump_bdev_channel
 {
+    struct nvme_io_path *current_io_path;               // 填充用，可能会有其它问题，先试试
+    enum bdev_nvme_multipath_policy		mp_policy;      // 填充用，可能会有其它问题，先试试
+	enum bdev_nvme_multipath_selector	mp_selector;    // 填充用，可能会有其它问题，先试试
+	uint32_t				rr_min_io;                  // 填充用，可能会有其它问题，先试试
+	uint32_t				rr_counter;                 // 填充用，可能会有其它问题，先试试
     TAILQ_HEAD(, ump_bdev_iopath)
     iopath_list;
+    TAILQ_ENTRY(ump_bdev_channel) tailq;                // ljx
 };
 
 /* ump_bdev逻辑路径结构 */
 struct ump_bdev_iopath
 {
+    TAILQ_ENTRY(ump_bdev_iopath) tailq;
     struct spdk_io_channel *io_channel;
     struct spdk_bdev *bdev;
+    // uint64_t reconnect_thread_id;   // 用于重连时的线程id
     bool available;
-    TAILQ_ENTRY(ump_bdev_iopath) tailq;
 };
 
 /* 参数上下文，用于保留必要变量并传递给回调函数 */
@@ -69,10 +133,27 @@ struct ump_bdev_io_completion_ctx
     spdk_bdev_io_completion_cb real_completion_cb;
     struct ump_bdev_iopath *iopath; // sd
 };
+
+
+// ljx sump_ctrl.c
+struct ump_failback_ctx
+{
+    struct ump_bdev_iopath *iopath;     
+    struct spdk_bdev_io *bdev_io;       // 用于发出io请求
+    struct spdk_thread *thread;
+    struct ump_bdev_channel *ump_channel;
+    struct ump_bdev_iopath *tqh_first;
+    struct spdk_poller *poller;
+    // struct ump_failback_ctx **addr;                         // 保存指向当前结构体地址的指针
+    // struct spdk_spinlock lock;          // 用于同步，避免double free等
+};
+struct ump_channel_list { struct ump_bdev_channel *tqh_first; struct ump_bdev_channel * *tqh_last;
+};
 /* 全局变量，组织所有ump_bdev设备 */
 extern struct ump_bdev_manage ump_bdev_manage;
 /* 全局变量，保存真正处理设备注册的函数指针 */
 extern int (*real_spdk_bdev_register)(struct spdk_bdev *bdev);
+TAILQ_HEAD(, ump_bdev_channel) g_ump_bdev_channels;
 
 /* sump_data.c */
 void __attribute__((constructor)) ump_init(void);
@@ -91,6 +172,10 @@ bool ump_bdev_io_type_supported(void *ctx, enum spdk_bdev_io_type io_type);
 int ump_bdev_dump_info_json(void *ctx, struct spdk_json_write_ctx *w);
 void ump_bdev_write_config_json(struct spdk_bdev *bdev, struct spdk_json_write_ctx *w);
 uint64_t ump_bdev_get_spin_time(struct spdk_io_channel *ch);
+
+void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io, struct ump_bdev_channel *ump_channel);
+void ump_failback_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg);
+int ump_failback_io_fn(void *arg1);
 
 /* sump_util.c */
 struct ump_bdev *get_ump_bdev_by_uuid(struct spdk_uuid *uuid);
