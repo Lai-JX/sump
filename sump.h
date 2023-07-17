@@ -20,52 +20,6 @@
 // TAILQ_EMPTY 检查队列是否为空
 // TAILQ_REMOVE 从队列中移除元素
 
-// 由于某些原因这里需要再定义一遍
-struct spdk_bdev_channel {
-	struct spdk_bdev	*bdev;
-
-	/* The channel for the underlying device */
-	struct spdk_io_channel	*channel;
-
-	/* Per io_device per thread data */
-	struct spdk_bdev_shared_resource *shared_resource;
-
-	struct spdk_bdev_io_stat *stat;
-
-	/*
-	 * Count of I/O submitted to the underlying dev module through this channel
-	 * and waiting for completion.
-	 */
-	uint64_t		io_outstanding;
-
-	/*
-	 * List of all submitted I/Os including I/O that are generated via splitting.
-	 */
-	bdev_io_tailq_t		io_submitted;
-
-	/*
-	 * List of spdk_bdev_io that are currently queued because they write to a locked
-	 * LBA range.
-	 */
-	bdev_io_tailq_t		io_locked;
-
-	uint32_t		flags;
-
-	struct spdk_histogram_data *histogram;
-
-#ifdef SPDK_CONFIG_VTUNE
-	uint64_t		start_tsc;
-	uint64_t		interval_tsc;
-	__itt_string_handle	*handle;
-	struct spdk_bdev_io_stat *prev_stat;
-#endif
-
-	bdev_io_tailq_t		queued_resets;
-
-	lba_range_tailq_t	locked_ranges;
-};
-
-
 /* 总的 ump_bdev 队列 */
 struct ump_bdev_manage
 {
@@ -103,11 +57,16 @@ enum bdev_nvme_multipath_selector {
 /* iopath队列 */ 
 struct ump_bdev_channel
 {
-    struct nvme_io_path *current_io_path;               // 填充用，可能会有其它问题，先试试
-    enum bdev_nvme_multipath_policy		mp_policy;      // 填充用，可能会有其它问题，先试试
-	enum bdev_nvme_multipath_selector	mp_selector;    // 填充用，可能会有其它问题，先试试
-	uint32_t				rr_min_io;                  // 填充用，可能会有其它问题，先试试
-	uint32_t				rr_counter;                 // 填充用，可能会有其它问题，先试试
+    struct nvme_io_path			*current_io_path;           // ljx 填充用，可能会有其它问题，先试试
+	enum bdev_nvme_multipath_policy		mp_policy;          // ljx 填充用，可能会有其它问题，先试试
+	enum bdev_nvme_multipath_selector	mp_selector;        // ljx 填充用，可能会有其它问题，先试试
+	uint32_t				rr_min_io;                      // ljx 填充用，可能会有其它问题，先试试
+	uint32_t				rr_counter;                     // ljx 填充用，可能会有其它问题，先试试
+	STAILQ_HEAD(, nvme_io_path)		io_path_list;           // ljx 填充用，可能会有其它问题，先试试
+	TAILQ_HEAD(retry_io_head, spdk_bdev_io)	retry_io_list;  // ljx 填充用，可能会有其它问题，先试试
+	struct spdk_poller			*retry_io_poller;           // ljx 填充用，可能会有其它问题，先试试
+    // 以上是struct nvme_bdev_channel中的内容，由于fail时，ump_channel与 nvme_bdev_channel 重合，为避免ump_bdev_channel的成员被无辜修改，故先填充 nvme_bdev_channel的成员
+
     TAILQ_HEAD(, ump_bdev_iopath)
     iopath_list;
     TAILQ_ENTRY(ump_bdev_channel) tailq;                // ljx
@@ -127,8 +86,6 @@ struct ump_bdev_iopath
 struct ump_bdev_io_completion_ctx
 {
     struct spdk_io_channel *ch;
-    struct spdk_bdev_io *bdev_io;
-    struct ump_bdev_channel ump_channel;
     void *real_caller_ctx;
     spdk_bdev_io_completion_cb real_completion_cb;
     struct ump_bdev_iopath *iopath; // sd
@@ -153,6 +110,7 @@ struct ump_channel_list { struct ump_bdev_channel *tqh_first; struct ump_bdev_ch
 extern struct ump_bdev_manage ump_bdev_manage;
 /* 全局变量，保存真正处理设备注册的函数指针 */
 extern int (*real_spdk_bdev_register)(struct spdk_bdev *bdev);
+/* 全局变量，保存所有的ump_channel */
 TAILQ_HEAD(, ump_bdev_channel) g_ump_bdev_channels;
 
 /* sump_data.c */

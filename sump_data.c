@@ -45,7 +45,7 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
     mbdev = spdk_io_channel_get_io_device(ch);
 
     //ljx
-    memcpy(&(ump_completion_ctx->ump_channel), ump_channel, sizeof(struct ump_bdev_channel));
+    // memcpy(&(ump_completion_ctx->ump_channel), ump_channel, sizeof(struct ump_bdev_channel));
 
     //     /* 寻找I/O路径 */
     iopath = ump_bdev_find_iopath(ump_channel);

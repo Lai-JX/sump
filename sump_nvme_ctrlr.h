@@ -5,6 +5,7 @@ struct nvme_ctrlr_opts {
 	uint32_t fast_io_fail_timeout_sec;
 	bool from_discovery_service;
 };
+struct nvme_ctrlr;
 typedef void (*bdev_nvme_reset_cb)(void *cb_arg, bool success);
 typedef void (*nvme_ctrlr_disconnected_cb)(struct nvme_ctrlr *nvme_ctrlr);
 struct nvme_bdev_ctrlr {
