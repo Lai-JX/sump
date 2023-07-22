@@ -1,5 +1,8 @@
 #include "sump.h"
 
+// 添加两个变量，用于统计每条路径的io次数
+static uint64_t count[4];
+struct spdk_poller * io_count_poller;
 
 /*************************************************************************/
 /***************************io channel begin*****************************/
@@ -17,9 +20,12 @@
 void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
 {
     struct ump_bdev_io_completion_ctx *completion_ctx = cb_arg;
+    struct ump_bdev_iopath *iopath = completion_ctx->iopath;
     if (success)
     {
-        sump_printf("io complete success.\n");
+        // sump_printf("io complete success.\n");
+        iopath->io_time = spdk_get_ticks() - bdev_io->internal.submit_tsc;      // 负载均衡算法：server-time
+        iopath->io_incomplete--;                                                // 负载均衡算法：queue-length
         completion_ctx->real_completion_cb(bdev_io, success, completion_ctx->real_caller_ctx);
         free(completion_ctx);
     }
@@ -29,28 +35,18 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
         // sd
         sump_printf("io complete failed.\n");
         struct spdk_io_channel *ch = completion_ctx->ch;
-        struct ump_bdev_iopath *iopath = completion_ctx->iopath;
         struct ump_bdev_channel *ump_channel = spdk_io_channel_get_ctx(ch);
 
-        printf("addr0!!!:%p\n", ch);
-
-        // TAILQ_REMOVE(&ump_channel->iopath_list, iopath, tailq);
-        // spdk_put_io_channel(iopath->io_channel);
-        // free(iopath);
         iopath->available = false;
-        // 轮询是否重连
-        // ump_failback(iopath, bdev_io, ump_channel);
-
-        // memcpy(ump_channel, &completion_ctx->ump_channel, sizeof(struct ump_bdev_channel));
 
         // sd
         // ljx:重新请求
         bdev_io->internal.cb = completion_ctx->real_completion_cb;
         bdev_io->internal.caller_ctx = completion_ctx->real_caller_ctx;
+        bdev_io->internal.submit_tsc = spdk_get_ticks();        // 重置初始时间戳
         free(completion_ctx);
         ump_bdev_submit_request(ch, bdev_io);
     }
-    // free(completion_ctx);
     return;
 err:
     free(completion_ctx);
@@ -65,6 +61,16 @@ err:
 * Return:           若找到路径，则返回ump_bdev_iopath结构体指针，否则返回空指针        
 **********************************************************/
 struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel)
+{
+    struct ump_bdev_iopath *iopath;
+    iopath = ump_find_iopath_service_time(ump_channel);
+    // iopath = ump_find_iopath_round_robin(ump_channel);
+    // iopath = ump_find_iopath_queue_length(ump_channel);
+    count[iopath->id]++;
+    return iopath;
+}
+
+struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump_channel)
 {
     // sd
     static int turn = 0;
@@ -89,17 +95,17 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
         sump_printf("TAILQ_EMPTY\n");
         return NULL;
     }
-    else
-    {
-        sump_printf("TAILQ_FOREACH\n");
-        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
-        {
-            if (iopath)
-            {
-                sump_printf("iopath addr:%p, name:%s\n", iopath, iopath->bdev->name);
-            }
-        }
-    }
+    // else
+    // {
+    //     sump_printf("TAILQ_FOREACH\n");
+    //     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    //     {
+    //         if (iopath)
+    //         {
+    //             sump_printf("iopath addr:%p, name:%s\n", iopath, iopath->bdev->name);
+    //         }
+    //     }
+    // }
 
     int idx = 0;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
@@ -107,7 +113,7 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
         if (iopath->available && idx == turn)
         {
             turn++;
-            sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+            // sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
             return iopath;
         }
         else
@@ -123,10 +129,44 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
             turn++;
         else
         {
-            sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+            // sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
             return iopath;
         }
     }
+}
+
+struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel)
+{
+    
+    uint64_t min_time = UINT64_MAX;             // 初始化为最大
+    struct ump_bdev_iopath *iopath, *iopath_chosen;
+    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    {
+        if (iopath->io_time < min_time)
+        {
+            min_time = iopath->io_time;
+            iopath_chosen = iopath;
+        }
+    }
+    // sump_printf("%s's IO channel is chosen\n", iopath_chosen->bdev->name);
+    return iopath_chosen;
+}
+
+struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *ump_channel)
+{
+    uint64_t min_io_count = UINT64_MAX;             // 最小未完成请求数 初始化为最大
+    struct ump_bdev_iopath *iopath, *iopath_chosen;
+    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    {
+        if (iopath->io_incomplete < min_io_count)
+        {
+            min_io_count = iopath->io_incomplete;
+            iopath_chosen = iopath;
+        }
+    }
+    // sump_printf("%s's IO channel is chosen, incomplete task:%ld\n", iopath_chosen->bdev->name, iopath_chosen->io_incomplete);
+    iopath_chosen->io_incomplete++;
+    return iopath_chosen;
 }
 
 /********************************************************
@@ -171,6 +211,11 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
     // if (TAILQ_EMPTY(&ump_channel->iopath_list))
     TAILQ_INIT(&ump_channel->iopath_list); // 当前mbdev在当前线程的各条路径
     TAILQ_INSERT_TAIL(&g_ump_bdev_channels, ump_channel, tailq);    // ljx
+    ump_channel->max_id = 0;
+
+    // 创建poller用于统计
+    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 10000000);
+
     printf("add ump_channel\n");
     // 遍历mbdev的所有bdev
     TAILQ_FOREACH(list_bdev, &mbdev->spdk_bdev_list, tailq)
@@ -195,6 +240,10 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
         iopath->io_channel = io_channel;
         iopath->bdev = bdev;
         iopath->available = true;
+        iopath->io_time = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+        iopath->id = ump_channel->max_id++;
+        iopath->io_incomplete = 0;
+        count[iopath->id] = 0;
         TAILQ_INSERT_TAIL(&ump_channel->iopath_list, iopath, tailq);
         sump_printf("%s's io channel is added\n", bdev->name);
     }
@@ -204,6 +253,13 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
 err:
     ump_bdev_channel_clear_all_iopath(ump_channel);
     return -1;
+}
+int ump_io_count_fn()
+{
+    for (int i = 0; i < 4; i++)
+    {
+        printf("path %d: io=%ld\n", i + 1, count[i]);
+    }
 }
 
 /********************************************************
@@ -220,6 +276,8 @@ void ump_bdev_channel_destroy_cb(void *io_device, void *ctx_buf)
     printf("ump_bdev_channel_destroy_cb\n");
     TAILQ_REMOVE(&g_ump_bdev_channels, ump_channel, tailq);
     printf("remove ump_channel\n");
+
+    spdk_poller_unregister(&io_count_poller);
     ump_bdev_channel_clear_all_iopath(ump_channel);
 }
 

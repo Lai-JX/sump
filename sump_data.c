@@ -24,7 +24,7 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
     struct ump_bdev *mbdev = NULL;
     struct ump_bdev_io_completion_ctx *ump_completion_ctx = NULL;
 
-    sump_printf("ump_bdev_submit_request\n");
+    // sump_printf("ump_bdev_submit_request\n");
     
     ump_completion_ctx = calloc(1, sizeof(struct ump_bdev_io_completion_ctx));
     if (ump_completion_ctx == NULL)
@@ -59,10 +59,10 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
     ump_completion_ctx->iopath = iopath;
     bdev = iopath->bdev;
     // bdev_io->internal.ch->channel = iopath->io_channel;
-    sump_printf("before bdev->fn_table->submit_request\n");
+    // sump_printf("before bdev->fn_table->submit_request\n");
     /* 提交I/O请求 */
     bdev->fn_table->submit_request(iopath->io_channel, bdev_io);
-    sump_printf("after bdev->fn_table->submit_request\n\n");
+    // sump_printf("after bdev->fn_table->submit_request\n\n");
 
 err:
     /* todo io complete */

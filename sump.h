@@ -70,6 +70,7 @@ struct ump_bdev_channel
     TAILQ_HEAD(, ump_bdev_iopath)
     iopath_list;
     TAILQ_ENTRY(ump_bdev_channel) tailq;                // ljx
+    uint64_t max_id;                                    // iopath_list 中最大的iopath->id(未使用)
 };
 
 /* ump_bdev逻辑路径结构 */
@@ -78,8 +79,10 @@ struct ump_bdev_iopath
     TAILQ_ENTRY(ump_bdev_iopath) tailq;
     struct spdk_io_channel *io_channel;
     struct spdk_bdev *bdev;
-    // uint64_t reconnect_thread_id;   // 用于重连时的线程id
-    bool available;
+    bool available;         // 是否可用
+    uint64_t io_time;       // io 时间
+    uint64_t id;
+    uint64_t io_incomplete;      // 未完成的io请求数
 };
 
 /* 参数上下文，用于保留必要变量并传递给回调函数 */
@@ -121,6 +124,12 @@ struct spdk_io_channel *ump_bdev_get_io_channel(void *ctx);
 /* sump_ctrl.c */
 void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg);
 struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel);
+// 路径选择算法
+struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *ump_channel);
+int ump_io_count_fn(); // debug用，测试各路径的io次数
+
 void ump_bdev_channel_clear_all_iopath(struct ump_bdev_channel *ump_channel);
 int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf);
 void ump_bdev_channel_destroy_cb(void *io_device, void *ctx_buf);

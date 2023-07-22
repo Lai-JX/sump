@@ -5,7 +5,6 @@ struct ump_bdev_manage ump_bdev_manage;
 /* 全局变量，保存真正处理设备注册的函数指针 */
 int (*real_spdk_bdev_register)(struct spdk_bdev *bdev);
 /* 全局变量，劫持_bdev_nvme_reset_complete函数，用于实现failback */
-// void (*real__bdev_nvme_reset_complete)(struct spdk_io_channel_iter *i, int status);
 int (*real_spdk_nvme_ctrlr_reconnect_poll_async)(struct spdk_nvme_ctrlr *ctrlr);
 
 /***********************************************************************
@@ -26,11 +25,6 @@ void __attribute__((constructor)) ump_init(void)
     // printf("%s\n",dlerror());
 }
 
-// void
-// _bdev_nvme_reset_complete(struct spdk_io_channel_iter *i, int status)
-// {
-//     printf("_bdev_nvme_reset_complete\n\n\n\n\n\n");
-// }
 int
 spdk_nvme_ctrlr_reconnect_poll_async(struct spdk_nvme_ctrlr *ctrlr)
 {
@@ -242,6 +236,29 @@ int ump_bdev_add_bdev(struct ump_bdev *mbdev, struct spdk_bdev *bdev)
     TAILQ_INSERT_TAIL(&mbdev->spdk_bdev_list, list_bdev, tailq);
     
     sump_printf("mbdev(%s) add new bdev success.\n", mbdev->bdev.name);
+
+    // 把路径添加进ump_bdev_channel
+    struct ump_bdev_iopath *iopath;
+    struct ump_bdev_channel *ch;
+    TAILQ_FOREACH(ch, &g_ump_bdev_channels, tailq)
+    {
+        TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
+        {
+            if(!spdk_uuid_compare(&mbdev->bdev.uuid, &iopath->bdev->uuid))   // 相等
+            {
+                struct ump_bdev_iopath *iopath = calloc(1, sizeof(struct ump_bdev_iopath));
+                iopath->io_channel = bdev->fn_table->get_io_channel(bdev->ctxt);
+                iopath->bdev = bdev;
+                iopath->available = true;
+                iopath->io_time = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+                iopath->id = ch->max_id++;
+                iopath->io_incomplete = 0;
+                TAILQ_INSERT_TAIL(&ch->iopath_list, iopath, tailq);
+                return 0;
+            }
+        }
+    }
+
 
     return 0;
 }
