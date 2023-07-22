@@ -1,5 +1,16 @@
 #! /bin/bash
 
+# 先杀死之前存在的相同进程
+sudo ./scripts/stop.sh
+# 启动nvme（pcie）      
+sudo ../../scripts/setup.sh
+
+# 编译nvme模块
+cd ./nvme
+make
+make install
+cd ../
+
 # 1. vhost端
 make debug
 make run &
@@ -7,13 +18,13 @@ sleep 1
 echo "========================================================================================="
 
 # 2. target端
-cd ../../../
+cd ../../
 ./build/bin/nvmf_tgt -m 0x1 -r /var/tmp/nvmf.sock &
 sleep 1
 echo "========================================================================================="
 
 # 3. 连接
-./module/ump/sump/scripts/vhost_test.sh > log.txt
+./module/sump/scripts/vhost_test.sh > log.txt
 echo "========================================================================================="
 
 # 4. 挂载
