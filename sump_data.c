@@ -1,6 +1,6 @@
 #include "sump.h"
 
-
+extern uint64_t count[4];
 /* 获取 I/O channel */
 struct spdk_io_channel *ump_bdev_get_io_channel(void *ctx)
 {
@@ -49,6 +49,10 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
 
     //     /* 寻找I/O路径 */
     iopath = ump_bdev_find_iopath(ump_channel);
+
+    // 统计
+    count[iopath->id] += (bdev_io->u.bdev.num_blocks) * spdk_bdev_get_block_size(bdev_io->bdev);
+
     if (iopath == NULL)
     {
         printf("mbdev(%s) don't has any iopath.\n", mbdev->bdev.name);

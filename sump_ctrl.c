@@ -1,7 +1,7 @@
 #include "sump.h"
 
 // 添加两个变量，用于统计每条路径的io次数
-static uint64_t count[4];
+uint64_t count[4];
 struct spdk_poller * io_count_poller;
 
 /*************************************************************************/
@@ -66,7 +66,6 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
     iopath = ump_find_iopath_service_time(ump_channel);
     // iopath = ump_find_iopath_round_robin(ump_channel);
     // iopath = ump_find_iopath_queue_length(ump_channel);
-    count[iopath->id]++;
     return iopath;
 }
 
@@ -258,7 +257,7 @@ int ump_io_count_fn()
 {
     for (int i = 0; i < 4; i++)
     {
-        printf("path %d: io=%ld\n", i + 1, count[i]);
+        printf("path %d: io=%ldKB\n", i + 1, count[i]/1024);
     }
 }
 

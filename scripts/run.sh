@@ -29,9 +29,18 @@ echo "==========================================================================
 
 # 4. 挂载
 bdev_output=`./scripts/rpc.py -s /var/tmp/vhost.sock bdev_get_bdevs | grep "name" | awk '{print $2}'`
-bdev_output=($bdev_output)
-mbdev=${bdev_output:1:-2}
-./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk $mbdev /dev/nbd0            
+i=0
+echo $bdev_output
+for bdev in $bdev_output
+do
+    if [ `expr $i % 2` == 0 ]
+    then
+        echo ${bdev:1:-2}
+        ./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk ${bdev:1:-2} /dev/nbd`expr $i / 2`
+    fi
+    i=`expr $i + 1`
+done
+# ./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk $mbdev /dev/nbd0            
 
 # 5. 下发io
 # sudo ../fio/fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=randrw -filename=/dev/nbd0 -name="BS 4KB randrw test" -iodepth=16 -runtime=10
