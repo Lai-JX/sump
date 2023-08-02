@@ -33,6 +33,7 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
     {
         /* todo 失败io处理 */
         // sd
+        printf("\n\n\n\n\n\n\n");
         sump_printf("io complete failed.\n");
         struct spdk_io_channel *ch = completion_ctx->ch;
         struct ump_bdev_channel *ump_channel = spdk_io_channel_get_ctx(ch);
@@ -63,9 +64,10 @@ err:
 struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel)
 {
     struct ump_bdev_iopath *iopath;
-    iopath = ump_find_iopath_service_time(ump_channel);
+    // iopath = ump_find_iopath_service_time(ump_channel);
     // iopath = ump_find_iopath_round_robin(ump_channel);
-    // iopath = ump_find_iopath_queue_length(ump_channel);
+    iopath = ump_find_iopath_queue_length(ump_channel);
+    sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
     return iopath;
 }
 
@@ -141,7 +143,7 @@ struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *um
     struct ump_bdev_iopath *iopath, *iopath_chosen;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
     {
-        if (iopath->io_time < min_time)
+        if (iopath->available && iopath->io_time < min_time)
         {
             min_time = iopath->io_time;
             iopath_chosen = iopath;
@@ -157,7 +159,7 @@ struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *um
     struct ump_bdev_iopath *iopath, *iopath_chosen;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
     {
-        if (iopath->io_incomplete < min_io_count)
+        if (iopath->available && iopath->io_incomplete < min_io_count)
         {
             min_io_count = iopath->io_incomplete;
             iopath_chosen = iopath;
@@ -213,7 +215,7 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
     ump_channel->max_id = 0;
 
     // 创建poller用于统计
-    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 10000000);
+    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 100000);    // 轮询的时间单位是微秒
 
     printf("add ump_channel\n");
     // 遍历mbdev的所有bdev
@@ -257,7 +259,7 @@ int ump_io_count_fn()
 {
     for (int i = 0; i < 4; i++)
     {
-        printf("path %d: io=%ldKB\n", i + 1, count[i]/1024);
+        // printf("path %d %ld KB\n", i, count[i]/1024);
     }
 }
 
