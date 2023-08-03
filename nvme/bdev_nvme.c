@@ -1125,7 +1125,7 @@ static void
 bdev_nvme_update_nvme_error_stat(struct spdk_bdev_io *bdev_io, const struct spdk_nvme_cpl *cpl)
 {
 	struct nvme_bdev *nbdev;
-	uint16_t sct, sc;
+	// uint16_t sct, sc;
 
 	assert(spdk_nvme_cpl_is_error(cpl));
 
@@ -1135,24 +1135,26 @@ bdev_nvme_update_nvme_error_stat(struct spdk_bdev_io *bdev_io, const struct spdk
 		return;
 	}
 
-	sct = cpl->status.sct;
-	sc = cpl->status.sc;
+	// sct = cpl->status.sct;
+	// sc = cpl->status.sc;
+	// sct = 0;
+	// sc = 8;
 
-	pthread_mutex_lock(&nbdev->mutex);
+	// pthread_mutex_lock(&nbdev->mutex);
 
-	nbdev->err_stat->status_type[sct]++;
-	switch (sct) {
-	case SPDK_NVME_SCT_GENERIC:
-	case SPDK_NVME_SCT_COMMAND_SPECIFIC:
-	case SPDK_NVME_SCT_MEDIA_ERROR:
-	case SPDK_NVME_SCT_PATH:
-		nbdev->err_stat->status[sct][sc]++;
-		break;
-	default:
-		break;
-	}
+	// nbdev->err_stat->status_type[sct]++;
+	// switch (sct) {
+	// case SPDK_NVME_SCT_GENERIC:
+	// case SPDK_NVME_SCT_COMMAND_SPECIFIC:
+	// case SPDK_NVME_SCT_MEDIA_ERROR:
+	// case SPDK_NVME_SCT_PATH:
+	// 	nbdev->err_stat->status[sct][sc]++;
+	// 	break;
+	// default:
+	// 	break;
+	// }
 
-	pthread_mutex_unlock(&nbdev->mutex);
+	// pthread_mutex_unlock(&nbdev->mutex);
 }
 
 static inline void
@@ -2077,6 +2079,7 @@ bdev_nvme_reconnect_ctrlr_poll(void *arg)
 	// printf("nvme_ctrlr:%p\n", nvme_ctrlr);
 	// printf("nvme_ctrlr->ctrlr:%p\n", nvme_ctrlr->ctrlr);
 	// printf("&(nvme_ctrlr->ctrlr):%p\n", &(nvme_ctrlr->ctrlr));
+	nvme_ctrlr->opts.ctrlr_loss_timeout_sec = 0;
 	if (!bdev_nvme_check_ctrlr_loss_timeout(nvme_ctrlr))
 	{
 		// rc = spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);	// ljx修改
@@ -2321,7 +2324,7 @@ bdev_nvme_failover(struct nvme_ctrlr *nvme_ctrlr, bool remove)
 
 	if (nvme_ctrlr->resetting) {
 		pthread_mutex_unlock(&nvme_ctrlr->mutex);
-		SPDK_NOTICELOG("Unable to perform reset, already in progress.\n");
+		// SPDK_NOTICELOG("Unable to perform reset, already in progress.\n");	// tmp
 		return -EBUSY;
 	}
 

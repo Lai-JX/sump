@@ -23,9 +23,10 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
     struct ump_bdev_iopath *iopath = completion_ctx->iopath;
     if (success)
     {
-        // sump_printf("io complete success.\n");
-        iopath->io_time = spdk_get_ticks() - bdev_io->internal.submit_tsc;      // 负载均衡算法：server-time
+        // sump_printf("io complete success.\n");   
+        update_io_time(iopath, bdev_io);                                           // 负载均衡算法：server-time
         iopath->io_incomplete--;                                                // 负载均衡算法：queue-length
+          
         completion_ctx->real_completion_cb(bdev_io, success, completion_ctx->real_caller_ctx);
         free(completion_ctx);
     }
@@ -33,7 +34,7 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
     {
         /* todo 失败io处理 */
         // sd
-        printf("\n\n\n\n\n\n\n");
+        // printf("\n\n\n\n\n\n\n");
         sump_printf("io complete failed.\n");
         struct spdk_io_channel *ch = completion_ctx->ch;
         struct ump_bdev_channel *ump_channel = spdk_io_channel_get_ctx(ch);
@@ -61,13 +62,17 @@ err:
 *   @ump_channel    ump_bedv_channel结构体指针，保存了I/O路径队列
 * Return:           若找到路径，则返回ump_bdev_iopath结构体指针，否则返回空指针        
 **********************************************************/
-struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel)
+struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io)
 {
     struct ump_bdev_iopath *iopath;
-    // iopath = ump_find_iopath_service_time(ump_channel);
+    // iopath = ump_find_iopath_service_time(ump_channel, bdev_io);
     // iopath = ump_find_iopath_round_robin(ump_channel);
-    iopath = ump_find_iopath_queue_length(ump_channel);
-    sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+    // iopath = ump_find_iopath_queue_length(ump_channel);
+    // iopath = ump_find_iopath_random(ump_channel);
+    // iopath = ump_find_iopath_random_weight_static(ump_channel);
+    iopath = ump_find_iopath_hash(ump_channel, bdev_io);
+
+    // sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
     return iopath;
 }
 
@@ -76,37 +81,12 @@ struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump
     // sd
     static int turn = 0;
     struct ump_bdev_iopath *iopath, *iopath1, *iopath2;
-    // iopath1 = (struct ump_bdev_iopath *)((&ump_channel->iopath_list)->tqh_last);
-    // if (iopath1)
-    // {
-    //     sump_printf("last iopath addr1:%p, name:%s\n", iopath1, iopath1->bdev->name);
-    //     iopath2 = (struct ump_bdev_iopath *)(iopath1->tailq.tqe_prev);
-    //     // if(iopath2->bdev > 0x100000000000)
-    //     // {
-    //     //     sump_printf("iopath addr2:%p, name:%s\n", iopath2, iopath2->bdev->name);
-    //     // }
-    // }
-    // else
-    // {
-    //     sump_printf("last iopath1 empty\n");
-    // }
 
     if (TAILQ_EMPTY(&ump_channel->iopath_list))
     {
         sump_printf("TAILQ_EMPTY\n");
         return NULL;
     }
-    // else
-    // {
-    //     sump_printf("TAILQ_FOREACH\n");
-    //     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
-    //     {
-    //         if (iopath)
-    //         {
-    //             sump_printf("iopath addr:%p, name:%s\n", iopath, iopath->bdev->name);
-    //         }
-    //     }
-    // }
 
     int idx = 0;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
@@ -136,21 +116,73 @@ struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump
     }
 }
 
-struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel)
+struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io)
 {
     
     uint64_t min_time = UINT64_MAX;             // 初始化为最大
     struct ump_bdev_iopath *iopath, *iopath_chosen;
-    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    if (bdev_io->type == SPDK_BDEV_IO_TYPE_READ)
     {
-        if (iopath->available && iopath->io_time < min_time)
+        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
         {
-            min_time = iopath->io_time;
-            iopath_chosen = iopath;
+            // sump_printf("%s's delay %ld\n", iopath->bdev->name, iopath->io_read_time.io_time_avg);
+            if (iopath->available && iopath->io_read_time.io_time_avg < min_time)
+            {
+                min_time = iopath->io_read_time.io_time_avg;
+                iopath_chosen = iopath;
+            }
         }
     }
+    else
+    {
+        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+        {
+            if (iopath->available && iopath->io_write_time.io_time_avg < min_time)
+            {
+                min_time = iopath->io_write_time.io_time_avg;
+                iopath_chosen = iopath;
+            }
+        }
+    }
+    
     // sump_printf("%s's IO channel is chosen\n", iopath_chosen->bdev->name);
     return iopath_chosen;
+}
+void update_io_time(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io)
+{
+    struct time_queue_ele *time_ele = calloc(1, sizeof(struct time_queue_ele));
+    if (time_ele == NULL)
+    {
+        fprintf(stderr, "calloc for time_queue_ele failed\n");
+        return;
+    }
+    time_ele->io_time = spdk_get_ticks() - bdev_io->internal.submit_tsc;
+
+    if (bdev_io->type == SPDK_BDEV_IO_TYPE_READ)
+    {
+        update_io_time_detail(time_ele, &iopath->io_read_time);
+    }
+    else
+    {
+        update_io_time_detail(time_ele, &iopath->io_write_time);
+    }
+}
+void update_io_time_detail(struct time_queue_ele *time_ele, struct time_queue *t_queue)
+{
+    TAILQ_INSERT_TAIL(&t_queue->time_list, time_ele, tailq);
+    t_queue->io_time_all += time_ele->io_time;
+
+    if (t_queue->len < 20) // 记录20次io的时延
+    {
+        t_queue->len++;
+        t_queue->io_time_avg = t_queue->io_time_all / t_queue->len;
+        return;
+    }
+    struct time_queue_ele *tqh_first = t_queue->time_list.tqh_first;
+    TAILQ_REMOVE(&t_queue->time_list, tqh_first, tailq);
+    t_queue->io_time_all -= tqh_first->io_time;
+    free(tqh_first);
+    t_queue->io_time_avg = t_queue->io_time_all / t_queue->len;
 }
 
 struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *ump_channel)
@@ -168,6 +200,105 @@ struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *um
     // sump_printf("%s's IO channel is chosen, incomplete task:%ld\n", iopath_chosen->bdev->name, iopath_chosen->io_incomplete);
     iopath_chosen->io_incomplete++;
     return iopath_chosen;
+}
+
+struct ump_bdev_iopath *ump_find_iopath_random(struct ump_bdev_channel *ump_channel)
+{
+    struct ump_bdev_iopath *iopath;
+    int turn, count;
+    while (1)
+    {
+        // 随机选择一个
+        struct timeval start;
+        gettimeofday( &start, NULL );
+        srand((unsigned)(1000000*start.tv_sec + start.tv_usec));    // 精确到毫秒的随机种子
+        turn = rand() % ump_channel->max_id;
+
+        count = 0;
+
+        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+        {
+            if (!iopath->available)
+                count++;
+            if (iopath->id == turn)
+            {
+                if (iopath->available)
+                    return iopath;
+                else
+                {
+                    if (count == ump_channel->max_id)
+                        return NULL;
+                    break;
+                }
+            }
+
+        }
+    }
+
+}
+
+struct ump_bdev_iopath *ump_find_iopath_random_weight_static(struct ump_bdev_channel *ump_channel)
+{
+    struct ump_bdev_iopath *iopath;
+    int factor1, chose_id;
+    float factor2;
+    
+    // 权重，暂时设定为4条路径
+    float w[4] = {0.5, 0.2, 0.2, 0.1};
+    // float w[4] = {1.0, 0, 0, 0};
+
+    // 累积和
+    float s[4];
+    s[0] = w[0];
+    for (int i = 1; i < 4; i++)
+        s[i] = s[i - 1] + w[i];
+    // printf("%f,%f\n", s[3],s[3]-1.0);
+    // if (s[3] < 1.0+1e-6 && s[3] > 1.0-1e-6)
+    // {
+    //     fprintf(stderr, "the sum of weights must be one.\n");
+    //     return NULL;
+    // }
+
+    // 先不考虑无路径可用的情况
+    while (1)
+    {
+        // 随机选择一个
+        struct timeval start;
+        gettimeofday( &start, NULL );
+        srand((unsigned)(1000000*start.tv_sec + start.tv_usec));    // 精确到毫秒的随机种子
+        factor1 = (4 * ump_channel->max_id);
+        factor2 = (float)(rand() % factor1);
+
+        factor2 = factor2 / factor1;
+        if (factor2 < s[0])
+            chose_id = 0;
+        else if (factor2 < s[1])
+            chose_id = 1;
+        else if (factor2 < s[2])
+            chose_id = 2;
+        else if (factor2 < s[3])
+            chose_id = 3;
+
+        TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+        {
+            if (iopath->available && chose_id == iopath->id)
+                return iopath;
+        }
+    }
+}
+
+struct ump_bdev_iopath *ump_find_iopath_hash(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io)
+{
+    struct ump_bdev_iopath *iopath;
+
+    // hash
+    unsigned int chose_id = (bdev_io->u.bdev.offset_blocks / bdev_io->u.bdev.num_blocks) % ump_channel->max_id;
+    // printf("chose id:%u\n", chose_id);
+    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    {
+        if (iopath->available && chose_id == iopath->id)
+            return iopath;
+    }
 }
 
 /********************************************************
@@ -215,7 +346,7 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
     ump_channel->max_id = 0;
 
     // 创建poller用于统计
-    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 100000);    // 轮询的时间单位是微秒
+    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 300000);    // 轮询的时间单位是微秒
 
     printf("add ump_channel\n");
     // 遍历mbdev的所有bdev
@@ -241,9 +372,13 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
         iopath->io_channel = io_channel;
         iopath->bdev = bdev;
         iopath->available = true;
-        iopath->io_time = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+        // iopath->io_time_read = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+        // iopath->io_time_write = 0;
+        iopath->io_time = 0;
         iopath->id = ump_channel->max_id++;
         iopath->io_incomplete = 0;
+        ump_time_queue_init(&iopath->io_read_time);
+        ump_time_queue_init(&iopath->io_write_time);
         count[iopath->id] = 0;
         TAILQ_INSERT_TAIL(&ump_channel->iopath_list, iopath, tailq);
         sump_printf("%s's io channel is added\n", bdev->name);
@@ -259,7 +394,19 @@ int ump_io_count_fn()
 {
     for (int i = 0; i < 4; i++)
     {
-        // printf("path %d %ld KB\n", i, count[i]/1024);
+        printf("path %d %ld KB\n", i, count[i]/1024);
+    }
+
+    // 定时清理io时间，防止某些路径一直不被使用
+    struct ump_bdev_iopath *iopath;
+    struct ump_bdev_channel *ch;
+    TAILQ_FOREACH(ch, &g_ump_bdev_channels, tailq)
+    {
+        TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
+        {
+            ump_time_queue_init(&iopath->io_read_time);
+            ump_time_queue_init(&iopath->io_write_time);
+        }
     }
 }
 

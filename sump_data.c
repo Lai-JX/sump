@@ -48,7 +48,7 @@ void ump_bdev_submit_request(struct spdk_io_channel *ch, struct spdk_bdev_io *bd
     // memcpy(&(ump_completion_ctx->ump_channel), ump_channel, sizeof(struct ump_bdev_channel));
 
     //     /* 寻找I/O路径 */
-    iopath = ump_bdev_find_iopath(ump_channel);
+    iopath = ump_bdev_find_iopath(ump_channel, bdev_io);
 
     // 统计
     count[iopath->id] += (bdev_io->u.bdev.num_blocks) * spdk_bdev_get_block_size(bdev_io->bdev);

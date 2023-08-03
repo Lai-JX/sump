@@ -6,6 +6,7 @@
 #include <spdk/bdev_module.h>
 #include <spdk/string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "sump_nvme_ctrlr.h"
 
 
@@ -73,17 +74,36 @@ struct ump_bdev_channel
     uint64_t max_id;                                    // iopath_list 中最大的iopath->id(未使用)
 };
 
+
+struct time_queue
+{
+    TAILQ_HEAD(, time_queue_ele) time_list;
+    unsigned int len;
+    uint64_t io_time_all;
+    uint64_t io_time_avg;
+};
+struct time_queue_ele
+{
+    TAILQ_ENTRY(time_queue_ele) tailq;
+    uint64_t io_time;
+};
+
 /* ump_bdev逻辑路径结构 */
 struct ump_bdev_iopath
 {
     TAILQ_ENTRY(ump_bdev_iopath) tailq;
     struct spdk_io_channel *io_channel;
     struct spdk_bdev *bdev;
-    bool available;         // 是否可用
-    uint64_t io_time;       // io 时间
+    bool available;                         // 是否可用
+    // uint64_t io_time_read;                // io 时间
+    // uint64_t io_time_write;               // io 时间
+    uint64_t io_time;
+    struct time_queue io_read_time;
+    struct time_queue io_write_time;
     uint64_t id;
-    uint64_t io_incomplete;      // 未完成的io请求数
+    uint64_t io_incomplete;                 // 未完成的io请求数
 };
+
 
 /* 参数上下文，用于保留必要变量并传递给回调函数 */
 struct ump_bdev_io_completion_ctx
@@ -123,12 +143,17 @@ struct spdk_io_channel *ump_bdev_get_io_channel(void *ctx);
 
 /* sump_ctrl.c */
 void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg);
-struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io);
 // 路径选择算法
 struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump_channel);
-struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_find_iopath_service_time(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io);
 struct ump_bdev_iopath *ump_find_iopath_queue_length(struct ump_bdev_channel *ump_channel);
-int ump_io_count_fn(); // debug用，测试各路径的io次数
+struct ump_bdev_iopath *ump_find_iopath_random(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_find_iopath_random_weight_static(struct ump_bdev_channel *ump_channel);
+struct ump_bdev_iopath *ump_find_iopath_hash(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io);
+void update_io_time(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io);
+void update_io_time_detail(struct time_queue_ele *time_ele, struct time_queue *q);
+int ump_io_count_fn(); // 测试各路径的io次数并重置时延
 
 void ump_bdev_channel_clear_all_iopath(struct ump_bdev_channel *ump_channel);
 int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf);
@@ -147,6 +172,8 @@ int ump_failback_io_fn(void *arg1);
 /* sump_util.c */
 struct ump_bdev *get_ump_bdev_by_uuid(struct spdk_uuid *uuid);
 void sump_printf(const char *fmt, ...);
+void ump_time_queue_init(struct time_queue *q);
+unsigned int BKDR_Hash(char *s);
 
 /* sump.c */
 int ump_bdev_construct(struct spdk_bdev *bdev);

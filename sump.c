@@ -250,9 +250,13 @@ int ump_bdev_add_bdev(struct ump_bdev *mbdev, struct spdk_bdev *bdev)
                 iopath->io_channel = bdev->fn_table->get_io_channel(bdev->ctxt);
                 iopath->bdev = bdev;
                 iopath->available = true;
-                iopath->io_time = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+                // iopath->io_time_read = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
+                // iopath->io_time_write = 0;
+                iopath->io_time = 0;
                 iopath->id = ch->max_id++;
                 iopath->io_incomplete = 0;
+                ump_time_queue_init(&iopath->io_read_time);
+                ump_time_queue_init(&iopath->io_write_time);
                 TAILQ_INSERT_TAIL(&ch->iopath_list, iopath, tailq);
                 return 0;
             }
