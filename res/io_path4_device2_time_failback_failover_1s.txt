@@ -1,0 +1,1067 @@
+0000:03:00.0 (15ad 07f0): Already using the uio_pci_generic driver
+INFO: Requested 1024 hugepages but 1024 already allocated on node0
+  INSTALL /usr/local/lib/libspdk_bdev_nvme.a
+  INSTALL /usr/local/lib/pkgconfig/spdk_bdev_nvme.pc
+  INSTALL /usr/local/lib/libspdk_bdev_nvme.so
+gcc -g -O0  -fPIC -shared -o /usr/lib64/ump.so sump.c sump_ctrl.c sump_data.c sump_util.c -ldl -DDEBUG_OUT
+[SUMP DEBUG] ump init start...
+[SUMP DEBUG] real_spdk_bdev_register = 0x7f1aca855ac0.
+[SUMP DEBUG] real_spdk_nvme_ctrlr_reconnect_poll_async = 0x7f1acabe7960.
+g_ump_bdev_iopaths:0x7f1acad35180
+=========================================================================================
+=========================================================================================
+=========================================================================================
+"ump-bdev-00000000-0000-0000-0000-000000000000", "NVMe "ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623", "NVMe
+ump-bdev-00000000-0000-0000-0000-000000000000
+ljx:print req
+{
+  "jsonrpc": "2.0",
+  "method": "nbd_start_disk",
+  "id": 1,
+  "params": {
+    "bdev_name": "ump-bdev-00000000-0000-0000-0000-000000000000",
+    "nbd_device": "/dev/nbd0"
+  }
+}
+/dev/nbd0
+ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623
+ljx:print req
+{
+  "jsonrpc": "2.0",
+  "method": "nbd_start_disk",
+  "id": 1,
+  "params": {
+    "bdev_name": "ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623",
+    "nbd_device": "/dev/nbd1"
+  }
+}
+/dev/nbd1
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_0n1
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is added
+[SUMP DEBUG] create new mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) success.
+ump_bdev_channel_destroy_cb
+remove ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is removed
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_1n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_2n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_3n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: ca519278-fd78-4a87-824e-4ed70d7c6623
+[SUMP DEBUG] name of the new bdev: ump2_0n1
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is added
+[SUMP DEBUG] create new mbdev(ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623) success.
+ump_bdev_channel_destroy_cb
+remove ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is removed
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: ca519278-fd78-4a87-824e-4ed70d7c6623
+[SUMP DEBUG] name of the new bdev: ump2_1n1
+[SUMP DEBUG] mbdev(ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: ca519278-fd78-4a87-824e-4ed70d7c6623
+[SUMP DEBUG] name of the new bdev: ump2_2n1
+[SUMP DEBUG] mbdev(ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: ca519278-fd78-4a87-824e-4ed70d7c6623
+[SUMP DEBUG] name of the new bdev: ump2_3n1
+[SUMP DEBUG] mbdev(ump-bdev-ca519278-fd78-4a87-824e-4ed70d7c6623) add new bdev success.
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is added
+[SUMP DEBUG] ump1_1n1's io channel is added
+[SUMP DEBUG] ump1_2n1's io channel is added
+[SUMP DEBUG] ump1_3n1's io channel is added
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is added
+[SUMP DEBUG] ump2_1n1's io channel is added
+[SUMP DEBUG] ump2_2n1's io channel is added
+[SUMP DEBUG] ump2_3n1's io channel is added
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 4 KB
+path 1 676 KB
+path 2 360 KB
+path 3 4 KB
+path 0 132 KB
+path 1 1624 KB
+path 2 864 KB
+path 3 364 KB
+path 0 11356 KB
+path 1 3752 KB
+path 2 7092 KB
+path 3 4948 KB
+path 0 43872 KB
+path 1 60604 KB
+path 2 13284 KB
+path 3 31328 KB
+path 0 51860 KB
+path 1 65912 KB
+path 2 19804 KB
+path 3 37668 KB
+path 0 67800 KB
+path 1 111120 KB
+path 2 65728 KB
+path 3 48816 KB
+path 0 77380 KB
+path 1 115888 KB
+path 2 73168 KB
+path 3 50172 KB
+path 0 138736 KB
+path 1 160224 KB
+path 2 75176 KB
+path 3 63888 KB
+path 0 148164 KB
+path 1 166728 KB
+path 2 78160 KB
+path 3 66580 KB
+path 0 198692 KB
+path 1 183856 KB
+path 2 114688 KB
+path 3 78600 KB
+path 0 205600 KB
+path 1 194228 KB
+path 2 117144 KB
+path 3 85316 KB
+path 0 212784 KB
+path 1 254036 KB
+path 2 145884 KB
+path 3 110732 KB
+path 0 216524 KB
+path 1 264880 KB
+path 2 153756 KB
+path 3 111924 KB
+path 0 262060 KB
+path 1 280404 KB
+path 2 184528 KB
+path 3 141964 KB
+path 0 273476 KB
+path 1 281524 KB
+path 2 192536 KB
+path 3 146360 KB
+path 0 292300 KB
+path 1 306604 KB
+path 2 240940 KB
+path 3 164772 KB
+path 0 300140 KB
+path 1 311640 KB
+path 2 248336 KB
+path 3 169528 KB
+path 0 312464 KB
+path 1 343808 KB
+path 2 282124 KB
+path 3 196500 KB
+path 0 316016 KB
+path 1 344860 KB
+path 2 284440 KB
+path 3 197632 KB
+path 0 340748 KB
+path 1 387856 KB
+path 2 304136 KB
+path 3 199360 KB
+path 0 350984 KB
+path 1 391508 KB
+path 2 306116 KB
+path 3 205984 KB
+path 0 409264 KB
+path 1 420888 KB
+path 2 325484 KB
+path 3 219464 KB
+path 0 410844 KB
+path 1 437568 KB
+path 2 327116 KB
+path 3 223632 KB
+path 0 433876 KB
+path 1 441812 KB
+path 2 329320 KB
+path 3 302224 KB
+path 0 436576 KB
+path 1 451004 KB
+path 2 333644 KB
+path 3 308648 KB
+path 0 463316 KB
+path 1 458832 KB
+path 2 355508 KB
+path 3 325972 KB
+path 0 470748 KB
+path 1 459040 KB
+path 2 362764 KB
+path 3 327332 KB
+path 0 522980 KB
+path 1 462468 KB
+path 2 370860 KB
+path 3 381288 KB
+path 0 528680 KB
+path 1 471016 KB
+path 2 372380 KB
+path 3 387936 KB
+path 0 533728 KB
+path 1 517304 KB
+path 2 384736 KB
+path 3 436924 KB
+path 0 540140 KB
+path 1 524460 KB
+path 2 386388 KB
+path 3 443336 KB
+path 0 550104 KB
+path 1 532596 KB
+path 2 412776 KB
+path 3 517352 KB
+path 0 561732 KB
+path 1 535620 KB
+path 2 426188 KB
+path 3 517988 KB
+path 0 607724 KB
+path 1 545816 KB
+path 2 463548 KB
+path 3 557268 KB
+path 0 620912 KB
+path 1 557256 KB
+path 2 466384 KB
+path 3 559360 KB
+path 0 628884 KB
+path 1 561836 KB
+path 2 559696 KB
+path 3 605808 KB
+path 0 638128 KB
+path 1 567544 KB
+path 2 570672 KB
+path 3 609860 KB
+path 0 677616 KB
+path 1 584056 KB
+path 2 637452 KB
+path 3 632272 KB
+path 0 692308 KB
+path 1 587244 KB
+path 2 646280 KB
+path 3 637348 KB
+path 0 715248 KB
+path 1 623608 KB
+path 2 683140 KB
+path 3 658208 KB
+path 0 715724 KB
+path 1 630696 KB
+path 2 683456 KB
+path 3 665564 KB
+path 0 767136 KB
+path 1 660640 KB
+path 2 724536 KB
+path 3 689844 KB
+path 0 769720 KB
+path 1 670800 KB
+path 2 735632 KB
+path 3 691772 KB
+path 0 800504 KB
+path 1 724280 KB
+path 2 764420 KB
+path 3 731628 KB
+path 0 805132 KB
+path 1 737184 KB
+path 2 773980 KB
+path 3 735616 KB
+path 0 885076 KB
+path 1 753784 KB
+path 2 809272 KB
+path 3 745080 KB
+path 0 899680 KB
+path 1 767804 KB
+path 2 812748 KB
+path 3 746176 KB
+path 0 913640 KB
+path 1 818464 KB
+path 2 874244 KB
+path 3 768852 KB
+path 0 931068 KB
+path 1 822784 KB
+path 2 880496 KB
+path 3 770540 KB
+path 0 1001744 KB
+path 1 856208 KB
+path 2 900032 KB
+path 3 803960 KB
+path 0 1009648 KB
+path 1 867508 KB
+path 2 903444 KB
+path 3 806252 KB
+nbdev_ch addr :0x55928fb1cf10
+nbdev_ch addr :0x55928fb1cf10
+nbdev_ch addr :0x55928fb1cf10
+[SUMP DEBUG] io complete failed.
+[SUMP DEBUG] io complete failed.
+[SUMP DEBUG] io complete failed.
+path 0 1013264 KB
+path 1 869060 KB
+path 2 966216 KB
+path 3 866128 KB
+path 0 1024928 KB
+path 1 869060 KB
+path 2 970280 KB
+path 3 877476 KB
+path 0 1091956 KB
+path 1 869060 KB
+path 2 980888 KB
+path 3 931968 KB
+path 0 1098600 KB
+path 1 869060 KB
+path 2 989420 KB
+path 3 941812 KB
+path 0 1110984 KB
+path 1 869060 KB
+path 2 1051524 KB
+path 3 1009104 KB
+path 0 1117792 KB
+path 1 869060 KB
+path 2 1074984 KB
+path 3 1011804 KB
+path 0 1191512 KB
+path 1 869060 KB
+path 2 1086992 KB
+path 3 1078532 KB
+path 0 1200816 KB
+path 1 869060 KB
+path 2 1102232 KB
+path 3 1085440 KB
+path 0 1249940 KB
+path 1 869060 KB
+path 2 1167476 KB
+path 3 1121304 KB
+path 0 1258508 KB
+path 1 869060 KB
+path 2 1169692 KB
+path 3 1139944 KB
+path 0 1302840 KB
+path 1 869060 KB
+path 2 1252368 KB
+path 3 1155816 KB
+path 0 1311936 KB
+path 1 869060 KB
+path 2 1257324 KB
+path 3 1164256 KB
+path 0 1349272 KB
+path 1 869060 KB
+path 2 1330300 KB
+path 3 1194776 KB
+path 0 1355812 KB
+path 1 869060 KB
+path 2 1336756 KB
+path 3 1205428 KB
+path 0 1485084 KB
+path 1 869060 KB
+path 2 1337204 KB
+path 3 1207300 KB
+path 0 1500124 KB
+path 1 869060 KB
+path 2 1342428 KB
+path 3 1212296 KB
+path 0 1554768 KB
+path 1 869060 KB
+path 2 1428984 KB
+path 3 1213536 KB
+path 0 1559464 KB
+path 1 869060 KB
+path 2 1445504 KB
+path 3 1224168 KB
+path 0 1610600 KB
+path 1 869060 KB
+path 2 1509148 KB
+path 3 1253516 KB
+path 0 1619848 KB
+path 1 869060 KB
+path 2 1514352 KB
+path 3 1260136 KB
+path 0 1659572 KB
+path 1 869060 KB
+path 2 1538852 KB
+path 3 1310344 KB
+path 0 1677256 KB
+path 1 869060 KB
+path 2 1553064 KB
+path 3 1312196 KB
+path 0 1756412 KB
+path 1 869060 KB
+path 2 1626492 KB
+path 3 1320716 KB
+path 0 1764276 KB
+path 1 869060 KB
+path 2 1642132 KB
+path 3 1325856 KB
+path 0 1893908 KB
+path 1 869060 KB
+path 2 1648780 KB
+path 3 1329780 KB
+path 0 1899788 KB
+path 1 869060 KB
+path 2 1659456 KB
+path 3 1336076 KB
+path 0 1949056 KB
+path 1 869060 KB
+path 2 1668708 KB
+path 3 1386500 KB
+path 0 1951132 KB
+path 1 869060 KB
+path 2 1689144 KB
+path 3 1388488 KB
+path 0 2038812 KB
+path 1 869060 KB
+path 2 1699556 KB
+path 3 1415564 KB
+path 0 2045660 KB
+path 1 869060 KB
+path 2 1711264 KB
+path 3 1423380 KB
+path 0 2078600 KB
+path 1 869060 KB
+path 2 1753532 KB
+path 3 1462664 KB
+path 0 2087620 KB
+path 1 869060 KB
+path 2 1753972 KB
+path 3 1480372 KB
+path 0 2182808 KB
+path 1 869060 KB
+path 2 1760564 KB
+path 3 1519208 KB
+path 0 2197564 KB
+path 1 869060 KB
+path 2 1776724 KB
+path 3 1521592 KB
+path 0 2253700 KB
+path 1 869060 KB
+path 2 1834304 KB
+path 3 1558236 KB
+path 0 2258580 KB
+path 1 869060 KB
+path 2 1845296 KB
+path 3 1569244 KB
+path 0 2328544 KB
+path 1 869060 KB
+path 2 1913308 KB
+path 3 1570320 KB
+path 0 2346736 KB
+path 1 869060 KB
+path 2 1914380 KB
+path 3 1582000 KB
+path 0 2384848 KB
+path 1 869060 KB
+path 2 1995896 KB
+path 3 1629004 KB
+path 0 2385724 KB
+path 1 869060 KB
+path 2 2015884 KB
+path 3 1643332 KB
+path 0 2447620 KB
+path 1 869060 KB
+path 2 2059760 KB
+path 3 1682896 KB
+path 0 2451156 KB
+path 1 869060 KB
+path 2 2081352 KB
+path 3 1689720 KB
+path 0 2511300 KB
+path 1 869060 KB
+path 2 2148560 KB
+path 3 1713296 KB
+path 0 2520444 KB
+path 1 869060 KB
+path 2 2160804 KB
+path 3 1723528 KB
+path 0 2564824 KB
+path 1 869060 KB
+path 2 2210396 KB
+path 3 1780960 KB
+path 0 2580560 KB
+path 1 869060 KB
+path 2 2216696 KB
+path 3 1788472 KB
+path 0 2702168 KB
+path 1 869060 KB
+path 2 2238120 KB
+path 3 1807684 KB
+path 0 2722232 KB
+path 1 869060 KB
+path 2 2246140 KB
+path 3 1814912 KB
+path 0 2783568 KB
+path 1 869060 KB
+path 2 2279812 KB
+path 3 1875688 KB
+path 0 2804644 KB
+path 1 869060 KB
+path 2 2283360 KB
+path 3 1883304 KB
+path 0 2866100 KB
+path 1 869060 KB
+path 2 2334204 KB
+path 3 1921924 KB
+path 0 2871072 KB
+path 1 869060 KB
+path 2 2353696 KB
+path 3 1930952 KB
+path 0 2920320 KB
+path 1 869060 KB
+path 2 2455936 KB
+path 3 1953132 KB
+path 0 2937632 KB
+path 1 869060 KB
+path 2 2468316 KB
+path 3 1958124 KB
+path 0 3057488 KB
+path 1 869060 KB
+path 2 2485844 KB
+path 3 1973892 KB
+path 0 3064064 KB
+path 1 869060 KB
+path 2 2493308 KB
+path 3 1990144 KB
+path 0 3135244 KB
+path 1 869060 KB
+path 2 2517836 KB
+path 3 2046344 KB
+path 0 3150616 KB
+path 1 869060 KB
+path 2 2524304 KB
+path 3 2056472 KB
+path 0 3155692 KB
+path 1 869060 KB
+path 2 2564700 KB
+path 3 2167216 KB
+path 0 3171376 KB
+path 1 869060 KB
+path 2 2579536 KB
+path 3 2171908 KB
+path 0 3248920 KB
+path 1 869060 KB
+path 2 2628396 KB
+path 3 2214936 KB
+path 0 3272456 KB
+path 1 869060 KB
+path 2 2637116 KB
+path 3 2217236 KB
+path 0 3333344 KB
+path 1 869060 KB
+path 2 2674400 KB
+path 3 2261964 KB
+path 0 3337764 KB
+path 1 869060 KB
+path 2 2698916 KB
+path 3 2264768 KB
+path 0 3427104 KB
+path 1 869060 KB
+path 2 2707044 KB
+path 3 2314320 KB
+path 0 3441420 KB
+path 1 869060 KB
+path 2 2722492 KB
+path 3 2316020 KB
+path 0 3536640 KB
+path 1 869060 KB
+path 2 2729784 KB
+path 3 2366596 KB
+path 0 3542176 KB
+path 1 869060 KB
+path 2 2741288 KB
+path 3 2383020 KB
+path 0 3581044 KB
+path 1 869060 KB
+path 2 2784424 KB
+path 3 2468760 KB
+path 0 3582708 KB
+path 1 869060 KB
+path 2 2787928 KB
+path 3 2499500 KB
+path 0 3594704 KB
+path 1 869060 KB
+path 2 2824824 KB
+path 3 2601752 KB
+path 0 3604532 KB
+path 1 869060 KB
+path 2 2841476 KB
+path 3 2607176 KB
+path 0 3669860 KB
+path 1 869060 KB
+path 2 2883664 KB
+path 3 2640120 KB
+path 0 3693312 KB
+path 1 869060 KB
+path 2 2890504 KB
+path 3 2641372 KB
+path 0 3750520 KB
+path 1 869060 KB
+path 2 2946856 KB
+path 3 2674292 KB
+path 0 3756868 KB
+path 1 869060 KB
+path 2 2954992 KB
+path 3 2692744 KB
+path 0 3856676 KB
+path 1 869060 KB
+path 2 2981376 KB
+path 3 2732360 KB
+path 0 3878556 KB
+path 1 869060 KB
+path 2 2984568 KB
+path 3 2740872 KB
+path 0 3937952 KB
+path 1 869060 KB
+path 2 3025288 KB
+path 3 2793472 KB
+path 0 3955984 KB
+path 1 869060 KB
+path 2 3027684 KB
+path 3 2804980 KB
+path 0 3980504 KB
+path 1 869060 KB
+path 2 3098092 KB
+path 3 2860380 KB
+path 0 3991140 KB
+path 1 869060 KB
+path 2 3113212 KB
+path 3 2866544 KB
+path 0 4018456 KB
+path 1 869060 KB
+path 2 3174640 KB
+path 3 2912552 KB
+path 0 4022072 KB
+path 1 869060 KB
+path 2 3189068 KB
+path 3 2913992 KB
+path 0 4023508 KB
+path 1 869060 KB
+path 2 3196392 KB
+path 3 3059848 KB
+path 0 4028772 KB
+path 1 869060 KB
+path 2 3211496 KB
+path 3 3074416 KB
+path 0 4096532 KB
+path 1 869060 KB
+path 2 3290928 KB
+path 3 3081556 KB
+path 0 4107304 KB
+path 1 869060 KB
+path 2 3297288 KB
+path 3 3093448 KB
+path 0 4174980 KB
+path 1 869060 KB
+path 2 3322224 KB
+path 3 3152496 KB
+path 0 4191116 KB
+path 1 869060 KB
+path 2 3336192 KB
+path 3 3154104 KB
+path 0 4305020 KB
+path 1 869060 KB
+path 2 3381132 KB
+path 3 3158272 KB
+path 0 4312528 KB
+path 1 869060 KB
+path 2 3402620 KB
+path 3 3163744 KB
+path 0 4337224 KB
+path 1 869060 KB
+path 2 3500704 KB
+path 3 3191768 KB
+path 0 4352284 KB
+path 1 869060 KB
+path 2 3508288 KB
+path 3 3200680 KB
+path 0 4388504 KB
+path 1 869060 KB
+path 2 3545008 KB
+path 3 3274372 KB
+path 0 4404348 KB
+path 1 869060 KB
+path 2 3547140 KB
+path 3 3285112 KB
+path 0 4501928 KB
+path 1 869060 KB
+path 2 3588772 KB
+path 3 3294044 KB
+path 0 4510788 KB
+path 1 869060 KB
+path 2 3600784 KB
+path 3 3306584 KB
+path 0 4528352 KB
+path 1 869060 KB
+path 2 3675288 KB
+path 3 3383256 KB
+path 0 4532288 KB
+path 1 869060 KB
+path 2 3693208 KB
+path 3 3396596 KB
+path 0 4614756 KB
+path 1 869060 KB
+path 2 3743856 KB
+path 3 3419452 KB
+path 0 4626732 KB
+path 1 869060 KB
+path 2 3752452 KB
+path 3 3423780 KB
+path 0 4659956 KB
+path 1 869060 KB
+path 2 3810452 KB
+path 3 3461276 KB
+path 0 4661156 KB
+path 1 869060 KB
+path 2 3825648 KB
+path 3 3473648 KB
+path 0 4760280 KB
+path 1 869060 KB
+path 2 3830564 KB
+path 3 3506196 KB
+path 0 4771820 KB
+path 1 869060 KB
+path 2 3843484 KB
+path 3 3507652 KB
+path 0 4829196 KB
+path 1 869060 KB
+path 2 3882148 KB
+path 3 3531480 KB
+path 0 4836948 KB
+path 1 869060 KB
+path 2 3886892 KB
+path 3 3543636 KB
+path 0 4877116 KB
+path 1 869060 KB
+path 2 3948068 KB
+path 3 3558444 KB
+path 0 4880644 KB
+path 1 869060 KB
+path 2 3959160 KB
+path 3 3569520 KB
+path 0 4931436 KB
+path 1 869060 KB
+path 2 4008784 KB
+path 3 3575928 KB
+path 0 4931660 KB
+path 1 869060 KB
+path 2 4020580 KB
+path 3 3587472 KB
+path 0 5000768 KB
+path 1 869060 KB
+path 2 4049656 KB
+path 3 3600836 KB
+path 0 5016244 KB
+path 1 869060 KB
+path 2 4052056 KB
+path 3 3605008 KB
+path 0 5063032 KB
+path 1 869060 KB
+path 2 4094344 KB
+path 3 3610924 KB
+path 0 5069660 KB
+path 1 869060 KB
+path 2 4095420 KB
+path 3 3616920 KB
+iopath->bdev->name:ump1_0n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump1_1n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath ump1_1n1 reconnect successful!
+iopath->bdev->name:ump1_2n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump1_3n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump2_0n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump2_1n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump2_2n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+iopath->bdev->name:ump2_3n1, nvme_ctrlr->nbdev_ctrlr->name:ump1_1
+
+spdk_nvme_ctrlr_reconnect_poll_async:reset successfully
+
+path 0 5078588 KB
+path 1 869188 KB
+path 2 4141328 KB
+path 3 3652132 KB
+path 0 5080664 KB
+path 1 874788 KB
+path 2 4146324 KB
+path 3 3652804 KB
+path 0 5141148 KB
+path 1 883240 KB
+path 2 4164528 KB
+path 3 3668716 KB
+path 0 5149536 KB
+path 1 883928 KB
+path 2 4170628 KB
+path 3 3672896 KB
+path 0 5175864 KB
+path 1 911608 KB
+path 2 4196024 KB
+path 3 3704312 KB
+path 0 5177764 KB
+path 1 920756 KB
+path 2 4199916 KB
+path 3 3709188 KB
+path 0 5210796 KB
+path 1 938936 KB
+path 2 4199968 KB
+path 3 3750656 KB
+path 0 5219740 KB
+path 1 938936 KB
+path 2 4206652 KB
+path 3 3761904 KB
+path 0 5226000 KB
+path 1 1022840 KB
+path 2 4223232 KB
+path 3 3764104 KB
+path 0 5227024 KB
+path 1 1027436 KB
+path 2 4234640 KB
+path 3 3771368 KB
+path 0 5269596 KB
+path 1 1033708 KB
+path 2 4279936 KB
+path 3 3778980 KB
+path 0 5276752 KB
+path 1 1034140 KB
+path 2 4288804 KB
+path 3 3785760 KB
+path 0 5287012 KB
+path 1 1038136 KB
+path 2 4345684 KB
+path 3 3843072 KB
+path 0 5292960 KB
+path 1 1050212 KB
+path 2 4346672 KB
+path 3 3853308 KB
+path 0 5320392 KB
+path 1 1085692 KB
+path 2 4354264 KB
+path 3 3902876 KB
+path 0 5320448 KB
+path 1 1113404 KB
+path 2 4354600 KB
+path 3 3902996 KB
+path 0 5336088 KB
+path 1 1149808 KB
+path 2 4395012 KB
+path 3 3942700 KB
+path 0 5345280 KB
+path 1 1154784 KB
+path 2 4401180 KB
+path 3 3949076 KB
+path 0 5383952 KB
+path 1 1191736 KB
+path 2 4439004 KB
+path 3 3961688 KB
+path 0 5388292 KB
+path 1 1192512 KB
+path 2 4457140 KB
+path 3 3964224 KB
+path 0 5443096 KB
+path 1 1215128 KB
+path 2 4477344 KB
+path 3 3990292 KB
+path 0 5445300 KB
+path 1 1217812 KB
+path 2 4488368 KB
+path 3 3999544 KB
+path 0 5464920 KB
+path 1 1263576 KB
+path 2 4540516 KB
+path 3 4010936 KB
+path 0 5475596 KB
+path 1 1269424 KB
+path 2 4545732 KB
+path 3 4018468 KB
+path 0 5513292 KB
+path 1 1309124 KB
+path 2 4583428 KB
+path 3 4036860 KB
+path 0 5522040 KB
+path 1 1316688 KB
+path 2 4591752 KB
+path 3 4039156 KB
+path 0 5551812 KB
+path 1 1341216 KB
+path 2 4614240 KB
+path 3 4086320 KB
+path 0 5557748 KB
+path 1 1351684 KB
+path 2 4619216 KB
+path 3 4091800 KB
+path 0 5598220 KB
+path 1 1385936 KB
+path 2 4630744 KB
+path 3 4143184 KB
+path 0 5599624 KB
+path 1 1390300 KB
+path 2 4641796 KB
+path 3 4154680 KB
+path 0 5633348 KB
+path 1 1426520 KB
+path 2 4664536 KB
+path 3 4190356 KB
+path 0 5642432 KB
+path 1 1436444 KB
+path 2 4667468 KB
+path 3 4192884 KB
+path 0 5707296 KB
+path 1 1472624 KB
+path 2 4691600 KB
+path 3 4197240 KB
+path 0 5719524 KB
+path 1 1475444 KB
+path 2 4699984 KB
+path 3 4202940 KB
+path 0 5774764 KB
+path 1 1496116 KB
+path 2 4753544 KB
+path 3 4214136 KB
+path 0 5788092 KB
+path 1 1499268 KB
+path 2 4756784 KB
+path 3 4223468 KB
+path 0 5834564 KB
+path 1 1514260 KB
+path 2 4802472 KB
+path 3 4244960 KB
+path 0 5840760 KB
+path 1 1517100 KB
+path 2 4813268 KB
+path 3 4251816 KB
+path 0 5884168 KB
+path 1 1552812 KB
+path 2 4865156 KB
+path 3 4252876 KB
+path 0 5891176 KB
+path 1 1561152 KB
+path 2 4873120 KB
+path 3 4258316 KB
+path 0 5960412 KB
+path 1 1578240 KB
+path 2 4918116 KB
+path 3 4260948 KB
+path 0 5968864 KB
+path 1 1585436 KB
+path 2 4922284 KB
+path 3 4266396 KB
+path 0 6020352 KB
+path 1 1597388 KB
+path 2 4957372 KB
+path 3 4295000 KB
+path 0 6027708 KB
+path 1 1602316 KB
+path 2 4965160 KB
+path 3 4303512 KB
+path 0 6063632 KB
+path 1 1640384 KB
+path 2 5006424 KB
+path 3 4326020 KB
+path 0 6075816 KB
+path 1 1647520 KB
+path 2 5014704 KB
+path 3 4327508 KB
+path 0 6094404 KB
+path 1 1679884 KB
+path 2 5041892 KB
+path 3 4380808 KB
+path 0 6098488 KB
+path 1 1687864 KB
+path 2 5049268 KB
+path 3 4387948 KB
+path 0 6159044 KB
+path 1 1718244 KB
+path 2 5066596 KB
+path 3 4407276 KB
+path 0 6171072 KB
+path 1 1731024 KB
+path 2 5067228 KB
+path 3 4409420 KB
+path 0 6228304 KB
+path 1 1753892 KB
+path 2 5102672 KB
+path 3 4429924 KB
+path 0 6231004 KB
+path 1 1763936 KB
+path 2 5106492 KB
+path 3 4440436 KB
+path 0 6297188 KB
+path 1 1784996 KB
+path 2 5121620 KB
+path 3 4466224 KB
+path 0 6299332 KB
+path 1 1790164 KB
+path 2 5130104 KB
+path 3 4476708 KB
+path 0 6329656 KB
+path 1 1820000 KB
+path 2 5176860 KB
+path 3 4503756 KB
+path 0 6342176 KB
+path 1 1822472 KB
+path 2 5177584 KB
+path 3 4514804 KB
+path 0 6376944 KB
+path 1 1872104 KB
+path 2 5211860 KB
+path 3 4532456 KB
+path 0 6382920 KB
+path 1 1877760 KB
+path 2 5221564 KB
+path 3 4537580 KB
+path 0 6431884 KB
+path 1 1892908 KB
+path 2 5241932 KB
+path 3 4579152 KB
+path 0 6443036 KB
+path 1 1896396 KB
+path 

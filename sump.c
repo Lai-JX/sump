@@ -41,7 +41,8 @@ spdk_nvme_ctrlr_reconnect_poll_async(struct spdk_nvme_ctrlr *ctrlr)
                 TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
                 {
                     printf("iopath->bdev->name:%s, nvme_ctrlr->nbdev_ctrlr->name:%s\n",iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name);
-                    if (!iopath->available && strstr(iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name))
+                    if (!iopath->available && \
+                    strstr(iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name))
                     {
                         printf("iopath %s reconnect successful!\n",iopath->bdev->name);
                         iopath->available = true;

@@ -172,7 +172,7 @@ int ump_failback_io_fn(void *arg1);
 /* sump_util.c */
 struct ump_bdev *get_ump_bdev_by_uuid(struct spdk_uuid *uuid);
 void sump_printf(const char *fmt, ...);
-void ump_time_queue_init(struct time_queue *q);
+void ump_time_queue_init(struct time_queue *t_queue);
 unsigned int BKDR_Hash(char *s);
 
 /* sump.c */

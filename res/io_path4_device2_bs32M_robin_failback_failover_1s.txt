@@ -1,0 +1,158 @@
+0000:03:00.0 (15ad 07f0): Already using the uio_pci_generic driver
+INFO: Requested 1024 hugepages but 1024 already allocated on node0
+  INSTALL /usr/local/lib/libspdk_bdev_nvme.a
+  INSTALL /usr/local/lib/pkgconfig/spdk_bdev_nvme.pc
+  INSTALL /usr/local/lib/libspdk_bdev_nvme.so
+gcc -g -O0  -fPIC -shared -o /usr/lib64/ump.so sump.c sump_ctrl.c sump_data.c sump_util.c -ldl -DDEBUG_OUT
+[SUMP DEBUG] ump init start...
+[SUMP DEBUG] real_spdk_bdev_register = 0x7f0f94f11ac0.
+[SUMP DEBUG] real_spdk_nvme_ctrlr_reconnect_poll_async = 0x7f0f952a3960.
+g_ump_bdev_iopaths:0x7f0f953f1180
+=========================================================================================
+=========================================================================================
+=========================================================================================
+"ump-bdev-00000000-0000-0000-0000-000000000000", "NVMe "ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31", "NVMe
+ump-bdev-00000000-0000-0000-0000-000000000000
+ljx:print req
+{
+  "jsonrpc": "2.0",
+  "method": "nbd_start_disk",
+  "id": 1,
+  "params": {
+    "bdev_name": "ump-bdev-00000000-0000-0000-0000-000000000000",
+    "nbd_device": "/dev/nbd0"
+  }
+}
+/dev/nbd0
+ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31
+ljx:print req
+{
+  "jsonrpc": "2.0",
+  "method": "nbd_start_disk",
+  "id": 1,
+  "params": {
+    "bdev_name": "ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31",
+    "nbd_device": "/dev/nbd1"
+  }
+}
+/dev/nbd1
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_0n1
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is added
+[SUMP DEBUG] create new mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) success.
+ump_bdev_channel_destroy_cb
+remove ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is removed
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_1n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_2n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 00000000-0000-0000-0000-000000000000
+[SUMP DEBUG] name of the new bdev: ump1_3n1
+[SUMP DEBUG] mbdev(ump-bdev-00000000-0000-0000-0000-000000000000) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 9cc065ce-bbd6-49df-b196-3ce4a6416e31
+[SUMP DEBUG] name of the new bdev: ump2_0n1
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is added
+[SUMP DEBUG] create new mbdev(ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31) success.
+ump_bdev_channel_destroy_cb
+remove ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is removed
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 9cc065ce-bbd6-49df-b196-3ce4a6416e31
+[SUMP DEBUG] name of the new bdev: ump2_1n1
+[SUMP DEBUG] mbdev(ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 9cc065ce-bbd6-49df-b196-3ce4a6416e31
+[SUMP DEBUG] name of the new bdev: ump2_2n1
+[SUMP DEBUG] mbdev(ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31) add new bdev success.
+[SUMP DEBUG] successfully hijack function <spdk_bdev_register> of shared objects
+[SUMP DEBUG] uuid of the new bdev: 9cc065ce-bbd6-49df-b196-3ce4a6416e31
+[SUMP DEBUG] name of the new bdev: ump2_3n1
+[SUMP DEBUG] mbdev(ump-bdev-9cc065ce-bbd6-49df-b196-3ce4a6416e31) add new bdev success.
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump1_0n1's io channel is added
+[SUMP DEBUG] ump1_1n1's io channel is added
+[SUMP DEBUG] ump1_2n1's io channel is added
+[SUMP DEBUG] ump1_3n1's io channel is added
+ump_bdev_get_io_channel
+ump_bdev_channel_create_cb
+add ump_channel
+[SUMP DEBUG] ump2_0n1's io channel is added
+[SUMP DEBUG] ump2_1n1's io channel is added
+[SUMP DEBUG] ump2_2n1's io channel is added
+[SUMP DEBUG] ump2_3n1's io channel is added
+path 0 4 KB
+path 1 436 KB
+path 2 600 KB
+path 3 4 KB
+path 0 4 KB
+path 1 436 KB
+path 2 600 KB
+path 3 4 KB
+path 0 4 KB
+path 1 436 KB
+path 2 600 KB
+path 3 4 KB
+path 0 4 KB
+path 1 436 KB
+path 2 600 KB
+path 3 4 KB
+path 0 8 KB
+path 1 668 KB
+path 2 1404 KB
+path 3 8 KB
+path 0 8 KB
+path 1 668 KB
+path 2 1404 KB
+path 3 8 KB
+path 0 188372 KB
+path 1 89800 KB
+path 2 148188 KB
+path 3 190464 KB
+path 0 205108 KB
+path 1 104900 KB
+path 2 164512 KB
+path 3 273632 KB
+path 0 478668 KB
+path 1 338664 KB
+path 2 523040 KB
+path 3 289368 KB
+path 0 539260 KB
+path 1 372220 KB
+path 2 539420 KB
+path 3 339196 KB
+path 0 652088 KB
+path 1 1048804 KB
+path 2 616592 KB
+path 3 345212 KB
+path 0 712548 KB
+path 1 1082716 KB
+path 2 637768 KB
+path 3 442580 KB
+path 0 1008940 KB
+path 1 1390220 KB
+path 2 809084 KB
+path 3 560084 KB
+path 0 1085548 KB
+path 1 1407196 KB
+path 2 889756 KB
+path 3 604392 KB
+path 0 1485916 KB
+path 1 1543276 KB
+path 2 1184624 KB
+path 3 65

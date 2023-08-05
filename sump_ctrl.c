@@ -24,8 +24,8 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
     if (success)
     {
         // sump_printf("io complete success.\n");   
-        update_io_time(iopath, bdev_io);                                           // 负载均衡算法：server-time
-        iopath->io_incomplete--;                                                // 负载均衡算法：queue-length
+        update_io_time(iopath, bdev_io);                                            // 负载均衡算法：server-time
+        iopath->io_incomplete--;                                                    // 负载均衡算法：queue-length
           
         completion_ctx->real_completion_cb(bdev_io, success, completion_ctx->real_caller_ctx);
         free(completion_ctx);
@@ -346,7 +346,7 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
     ump_channel->max_id = 0;
 
     // 创建poller用于统计
-    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 300000);    // 轮询的时间单位是微秒
+    io_count_poller = spdk_poller_register(ump_io_count_fn, NULL, 1000000);    // 轮询的时间单位是微秒
 
     printf("add ump_channel\n");
     // 遍历mbdev的所有bdev
@@ -390,6 +390,7 @@ err:
     ump_bdev_channel_clear_all_iopath(ump_channel);
     return -1;
 }
+
 int ump_io_count_fn()
 {
     for (int i = 0; i < 4; i++)
