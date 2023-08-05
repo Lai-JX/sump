@@ -40,7 +40,7 @@ do
     fi
     i=`expr $i + 1`
 done
-# ./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk $mbdev /dev/nbd0            
+# ./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk  /dev/nbd0            
 
 # 5. 下发io
 # sudo ../fio/fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=randrw -filename=/dev/nbd0 -name="BS 4KB randrw test" -iodepth=16 -runtime=10

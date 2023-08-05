@@ -40,7 +40,8 @@ void ump_bdev_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void 
         struct ump_bdev_channel *ump_channel = spdk_io_channel_get_ctx(ch);
 
         iopath->available = false;
-
+        // 例询已实现故障恢复
+        ump_failback(iopath, bdev_io);
         // sd
         // ljx:重新请求
         bdev_io->internal.cb = completion_ctx->real_completion_cb;
@@ -64,6 +65,12 @@ err:
 **********************************************************/
 struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channel, struct spdk_bdev_io *bdev_io)
 {
+    if (TAILQ_EMPTY(&ump_channel->iopath_list))
+    {
+        sump_printf("TAILQ_EMPTY\n");
+        return NULL;
+    }
+
     struct ump_bdev_iopath *iopath;
     // iopath = ump_find_iopath_service_time(ump_channel, bdev_io);
     // iopath = ump_find_iopath_round_robin(ump_channel);
@@ -72,7 +79,7 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
     // iopath = ump_find_iopath_random_weight_static(ump_channel);
     iopath = ump_find_iopath_hash(ump_channel, bdev_io);
 
-    // sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+    sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
     return iopath;
 }
 
@@ -82,11 +89,6 @@ struct ump_bdev_iopath *ump_find_iopath_round_robin(struct ump_bdev_channel *ump
     static int turn = 0;
     struct ump_bdev_iopath *iopath, *iopath1, *iopath2;
 
-    if (TAILQ_EMPTY(&ump_channel->iopath_list))
-    {
-        sump_printf("TAILQ_EMPTY\n");
-        return NULL;
-    }
 
     int idx = 0;
     TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
@@ -299,6 +301,13 @@ struct ump_bdev_iopath *ump_find_iopath_hash(struct ump_bdev_channel *ump_channe
         if (iopath->available && chose_id == iopath->id)
             return iopath;
     }
+    // 若刚好选中那个是不可用的，则选择第一个可用的
+    TAILQ_FOREACH(iopath, &ump_channel->iopath_list, tailq)
+    {
+        if(iopath->available)
+            return iopath;
+    }
+    return NULL;
 }
 
 /********************************************************
@@ -374,9 +383,10 @@ int ump_bdev_channel_create_cb(void *io_device, void *ctx_buf)
         iopath->available = true;
         // iopath->io_time_read = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
         // iopath->io_time_write = 0;
-        iopath->io_time = 0;
+        // iopath->io_time = 0;
         iopath->id = ump_channel->max_id++;
         iopath->io_incomplete = 0;
+        iopath->reconnecting = false;
         ump_time_queue_init(&iopath->io_read_time);
         ump_time_queue_init(&iopath->io_write_time);
         count[iopath->id] = 0;
@@ -395,7 +405,7 @@ int ump_io_count_fn()
 {
     for (int i = 0; i < 4; i++)
     {
-        printf("path %d %ld KB\n", i, count[i]/1024);
+        // printf("path %d %ld KB\n", i, count[i]/1024);
     }
 
     // 定时清理io时间，防止某些路径一直不被使用
@@ -475,94 +485,115 @@ uint64_t ump_bdev_get_spin_time(struct spdk_io_channel *ch)
 /******************************failback begin*****************************/
 /*************************************************************************/
 
-// void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io, struct ump_bdev_channel *ump_channel)
-// {
-//     sump_printf("ump_failback! bdev name:%s\n", iopath->bdev->name);
-//     // 1. 创建线程
-//     char thread_name[128];
-//     sprintf(thread_name, "failback_%s", iopath->bdev->name);
-//     struct spdk_cpuset tmp_cpumask = {};
-//     spdk_cpuset_zero(&tmp_cpumask);
-//     spdk_cpuset_set_cpu(&tmp_cpumask, 2, true);
-//     struct spdk_thread *thread = spdk_thread_create(thread_name, &tmp_cpumask);
+void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io)
+{
+    if (iopath->reconnecting)
+        return;
+    iopath->reconnecting = true;
+    sump_printf("ump_failback! bdev name:%s\n", iopath->bdev->name);
+    // 1. 创建线程
+    // char thread_name[128];
+    // sprintf(thread_name, "failback_%s", iopath->bdev->name);
+    // struct spdk_cpuset tmp_cpumask = {};
+    // spdk_cpuset_zero(&tmp_cpumask);
+    // spdk_cpuset_set_cpu(&tmp_cpumask, 2, true);
+    // struct spdk_thread *thread = spdk_thread_create(thread_name, &tmp_cpumask);
 
-//     // 2. 启动线程
-//     struct ump_failback_ctx *ump_failback_ctx = malloc(sizeof(struct ump_failback_ctx));
-//     // ump_failback_ctx->bdev_io = malloc(sizeof(struct spdk_bdev_io));
-//     // memcpy(ump_failback_ctx->bdev_io, bdev_io, sizeof(struct spdk_bdev_io));
-//     ump_failback_ctx->bdev_io = bdev_io;
-//     ump_failback_ctx->iopath = iopath;
-//     ump_failback_ctx->thread = thread;
-//     ump_failback_ctx->ump_channel = ump_channel;
-//     ump_failback_ctx->tqh_first = ump_channel->iopath_list.tqh_first;
-//     // ump_failback_ctx->addr = &ump_failback_ctx;
-//     // spdk_spin_init(&ump_failback_ctx->lock);    // 初始化自旋锁
-//     ump_failback_ctx->poller = spdk_poller_register(ump_failback_io_fn, (void *)ump_failback_ctx, 1000); // 每1000微秒试一下是否已经重连
-//     // spdk_thread_send_msg(thread, ump_failback_io_fn, (void *)ump_failback_ctx);
+    // 2. 启动线程
+    struct ump_failback_ctx *ump_failback_ctx = malloc(sizeof(struct ump_failback_ctx));
 
-//     return;
-// err:
-//     /* todo io complete */
-//     return;
-// }
+    ump_failback_ctx->bdev_io = malloc(sizeof(struct spdk_bdev_io));
+    memcpy(ump_failback_ctx->bdev_io, bdev_io, sizeof(struct spdk_bdev_io));
+    
+    ump_failback_ctx->iopath = iopath;
+    // ump_failback_ctx->thread = thread;
+    // ump_failback_ctx->ump_channel = ump_channel;
+    // ump_failback_ctx->tqh_first = ump_channel->iopath_list.tqh_first;
+    // ump_failback_ctx->addr = &ump_failback_ctx;
+    // spdk_spin_init(&ump_failback_ctx->lock);    // 初始化自旋锁
+    // ump_failback_ctx->poller = spdk_poller_register(ump_failback_io_fn, (void *)ump_failback_ctx, 10000); // 每10000微秒试一下是否已经重连
+    spdk_poller_register_named(ump_failback_io_fn, (void *)ump_failback_ctx, 1000000, "failback"); // 每10000微秒试一下是否已经重连
+    // spdk_thread_send_msg(thread, ump_failback_io_fn, (void *)ump_failback_ctx);
 
-// int ump_failback_io_fn(void *arg1)
-// {
-//     struct ump_failback_ctx *ump_failback_ctx = arg1;
-//     struct ump_bdev_iopath *iopath = ump_failback_ctx->iopath;
-//     struct spdk_bdev_io *bdev_io = ump_failback_ctx->bdev_io;
-//     // printf("iopath:%p\n", iopath);
-//     // printf("iopath->bdev:%p\n", iopath->bdev);
-//     // printf("iopath->bdev->name:%p\n", iopath->bdev->name);
-//     // sump_printf("ump_failback_io_fn! bdev name:%s\n", iopath->bdev->name);
-//     bdev_io->internal.cb = ump_failback_io_completion_cb;
-//     bdev_io->internal.caller_ctx = ump_failback_ctx;
+    return;
+err:
+    /* todo io complete */
+    return;
+}
 
-//     /* 提交I/O请求 */
-//     // bdev_io->internal.ch->channel = iopath->io_channel;
-//     iopath->bdev->fn_table->submit_request(iopath->io_channel, bdev_io);
+int ump_failback_io_fn(void *arg1)
+{
+    struct ump_failback_ctx *ump_failback_ctx = arg1;
+    struct ump_bdev_iopath *iopath = ump_failback_ctx->iopath;
+    struct spdk_bdev_io *bdev_io = ump_failback_ctx->bdev_io;
+    // printf("iopath:%p\n", iopath);
+    // printf("iopath->bdev:%p\n", iopath->bdev);
+    // printf("iopath->bdev->name:%p\n", iopath->bdev->name);
+    sump_printf("ump_failback_io_fn! bdev name:%s\n", iopath->bdev->name);
+    bdev_io->internal.cb = ump_failback_io_completion_cb;
+    bdev_io->internal.caller_ctx = ump_failback_ctx;
 
-//     return 0;
-// }
+    /* 提交I/O请求 */
+    // bdev_io->internal.ch->channel = iopath->io_channel;
+    iopath->bdev->fn_table->submit_request(iopath->io_channel, bdev_io);
 
-// void ump_failback_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
-// {
-//     struct ump_failback_ctx *ump_failback_ctx = cb_arg;
-//     static bool flag = true;
-//     if (flag && success)
-//     {
-//         printf("addr1!!!:%p\n", (bdev_io->internal.ch));
-//         // printf("addr2!!!:%p\n", (bdev_io->internal.ch)->channel);
-//         sump_printf("io reconnect success.\n");
-//         // printf("ump_failback_ctx addr:%p\n", ump_failback_ctx);
-//         // printf("ump_failback_ctx->thread addr:%p\n", ump_failback_ctx->thread);
+    return 0;
+}
+
+void ump_failback_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, void *cb_arg)
+{
+    struct ump_failback_ctx *ump_failback_ctx = cb_arg;
+    // static bool flag = true;
+    if (success)
+    {
+        // printf("addr1!!!:%p\n", (bdev_io->internal.ch));
+        // printf("addr2!!!:%p\n", (bdev_io->internal.ch)->channel);
+        sump_printf("io reconnect success.\n");
+        // printf("ump_failback_ctx addr:%p\n", ump_failback_ctx);
+        // printf("ump_failback_ctx->thread addr:%p\n", ump_failback_ctx->thread);
         
-//         // spdk_spin_lock(&ump_failback_ctx->lock);
-//         if (ump_failback_ctx)                           // 这里需要加锁，不然会double free （虽然不知道为什么）
-//         {
-//             ump_failback_ctx->iopath->available = true;
-//             // struct ump_failback_ctx **addr_tmp = ump_failback_ctx->addr;
-//             spdk_poller_pause(ump_failback_ctx->poller);
-//             // spdk_poller_unregister(ump_failback_ctx->poller);
-//             spdk_thread_exit(ump_failback_ctx->thread); // 退出当前线程
-//             // spdk_spin_lock(&ump_failback_ctx->lock);
-//             // spdk_spin_destroy(&ump_failback_ctx->lock);
-//             // free(ump_failback_ctx->bdev_io);
-//             free(ump_failback_ctx);
-//             // *addr_tmp = NULL;
-//         }
-//         flag = false;
-//     }
-//     if (!success)
-//     {
-//         ump_failback_ctx->ump_channel->iopath_list.tqh_first = ump_failback_ctx->tqh_first;
-//     }
-//     // else
-//     // {
-//     //     sump_printf("io reconnect fail.\n");
-//     // }
-//     return;
-// }
+        // spdk_spin_lock(&ump_failback_ctx->lock);
+        ump_failback_ctx->iopath->available = true;
+        // struct ump_failback_ctx **addr_tmp = ump_failback_ctx->addr;
+        struct spdk_thread *thread = spdk_get_thread();
+        struct spdk_poller *poller;
+
+
+        RB_FOREACH(poller, timed_pollers_tree, &thread->timed_pollers) {
+            sump_printf("poller name:%s\n", poller->name);
+            if (strcmp(poller->name, "failback") == 0)
+            {
+                sump_printf("%s poller pause!\n", poller->name);
+                spdk_poller_pause(poller);
+                // spdk_poller_unregister(&poller);
+                free(bdev_io);
+                free(ump_failback_ctx);
+            }
+        }
+        // TAILQ_FOREACH(poller, &thread->active_pollers, tailq)
+        // {
+        //     printf("poller name:%s\n", poller->name);
+        //     if (strcmp(poller->name, "failback") == 0)
+        //     {
+        //         printf("poller pause!\n");
+        //         spdk_poller_pause(poller);
+        //     }   
+        // }
+        // spdk_poller_unregister(ump_failback_ctx->poller);
+        // spdk_thread_exit(ump_failback_ctx->thread); // 退出当前线程
+        // spdk_spin_lock(&ump_failback_ctx->lock);
+        // spdk_spin_destroy(&ump_failback_ctx->lock);
+        // free(bdev_io);
+            // free(ump_failback_ctx);
+            // *addr_tmp = NULL;
+        
+    }
+    // else
+    // {
+    //     sump_printf("io reconnect fail.\n");
+    // }
+    return;
+}
 
 /*************************************************************************/
 /******************************failback end*****************************/

@@ -1337,7 +1337,7 @@ bdev_nvme_io_complete(struct nvme_bdev_io *bio, int rc)
 		break;
 	case -ENXIO:
 		nbdev_ch = spdk_io_channel_get_ctx(spdk_bdev_io_get_io_channel(bdev_io));
-		printf("nbdev_ch addr :%p\n", nbdev_ch);
+		// printf("nbdev_ch addr :%p\n", nbdev_ch);
 		bdev_nvme_clear_current_io_path(nbdev_ch); // ljx
 		bio->io_path = NULL;
 
@@ -2082,9 +2082,9 @@ bdev_nvme_reconnect_ctrlr_poll(void *arg)
 	nvme_ctrlr->opts.ctrlr_loss_timeout_sec = 0;
 	if (!bdev_nvme_check_ctrlr_loss_timeout(nvme_ctrlr))
 	{
-		// rc = spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);	// ljx修改
-		nvme_ctrlr->size = sizeof(struct nvme_ctrlr);						// ljx修改
-		rc = spdk_nvme_ctrlr_reconnect_poll_async((struct spdk_nvme_ctrlr *)nvme_ctrlr);
+		rc = spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);	// ljx修改
+		// nvme_ctrlr->size = sizeof(struct nvme_ctrlr);						// ljx修改
+		// rc = spdk_nvme_ctrlr_reconnect_poll_async((struct spdk_nvme_ctrlr *)nvme_ctrlr);
 		if (rc == -EAGAIN) {
 			return SPDK_POLLER_BUSY;
 		}

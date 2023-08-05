@@ -9,5 +9,5 @@ kill_all()
     done
 }
 
-kill_all "../../build/bin/vhost -m 0x2 -r /var/tmp/vhost.sock -s 128 -R --num-trace-entries 0"
-kill_all "./build/bin/nvmf_tgt -m 0x1 -r /var/tmp/nvmf.sock"
+kill_all "vhost"
+kill_all "nvmf_tgt"

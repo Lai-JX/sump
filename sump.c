@@ -25,39 +25,39 @@ void __attribute__((constructor)) ump_init(void)
     // printf("%s\n",dlerror());
 }
 
-int
-spdk_nvme_ctrlr_reconnect_poll_async(struct spdk_nvme_ctrlr *ctrlr)
-{
-    struct nvme_ctrlr *nvme_ctrlr = (struct nvme_ctrlr *)ctrlr;
-    if(nvme_ctrlr->size == sizeof(struct nvme_ctrlr))
-    {
-        int rc = real_spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);
-        if(rc == 0)
-        {
-            struct ump_bdev_iopath *iopath;
-            struct ump_bdev_channel *ch;
-            TAILQ_FOREACH(ch, &g_ump_bdev_channels, tailq)
-            {
-                TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
-                {
-                    printf("iopath->bdev->name:%s, nvme_ctrlr->nbdev_ctrlr->name:%s\n",iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name);
-                    if (!iopath->available && \
-                    strstr(iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name))
-                    {
-                        printf("iopath %s reconnect successful!\n",iopath->bdev->name);
-                        iopath->available = true;
-                    }
-                }
-            }
-            printf("\nspdk_nvme_ctrlr_reconnect_poll_async:reset successfully\n\n");
-        }
-        return rc;
-    }
-    else
-    {
-        return real_spdk_nvme_ctrlr_reconnect_poll_async(ctrlr);
-    }
-}
+// int
+// spdk_nvme_ctrlr_reconnect_poll_async(struct spdk_nvme_ctrlr *ctrlr)
+// {
+//     struct nvme_ctrlr *nvme_ctrlr = (struct nvme_ctrlr *)ctrlr;
+//     if(nvme_ctrlr->size == sizeof(struct nvme_ctrlr))
+//     {
+//         int rc = real_spdk_nvme_ctrlr_reconnect_poll_async(nvme_ctrlr->ctrlr);
+//         if(rc == 0)
+//         {
+//             struct ump_bdev_iopath *iopath;
+//             struct ump_bdev_channel *ch;
+//             TAILQ_FOREACH(ch, &g_ump_bdev_channels, tailq)
+//             {
+//                 TAILQ_FOREACH(iopath, &ch->iopath_list, tailq)
+//                 {
+//                     printf("iopath->bdev->name:%s, nvme_ctrlr->nbdev_ctrlr->name:%s\n",iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name);
+//                     if (!iopath->available && \
+//                     strstr(iopath->bdev->name, nvme_ctrlr->nbdev_ctrlr->name))
+//                     {
+//                         printf("iopath %s reconnect successful!\n",iopath->bdev->name);
+//                         iopath->available = true;
+//                     }
+//                 }
+//             }
+//             printf("\nspdk_nvme_ctrlr_reconnect_poll_async:reset successfully\n\n");
+//         }
+//         return rc;
+//     }
+//     else
+//     {
+//         return real_spdk_nvme_ctrlr_reconnect_poll_async(ctrlr);
+//     }
+// }
 
 /********************************************************
 * Function name:    spdk_bdev_register
@@ -253,9 +253,10 @@ int ump_bdev_add_bdev(struct ump_bdev *mbdev, struct spdk_bdev *bdev)
                 iopath->available = true;
                 // iopath->io_time_read = 0;       // io时间初始化为最小，确保一开始每一条路径都会被加进去
                 // iopath->io_time_write = 0;
-                iopath->io_time = 0;
+                // iopath->io_time = 0;
                 iopath->id = ch->max_id++;
                 iopath->io_incomplete = 0;
+                iopath->reconnecting = false;
                 ump_time_queue_init(&iopath->io_read_time);
                 ump_time_queue_init(&iopath->io_write_time);
                 TAILQ_INSERT_TAIL(&ch->iopath_list, iopath, tailq);
