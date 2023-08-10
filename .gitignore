@@ -1,1 +1,5 @@
-./*.txt
+*.txt
+res
+core
+guest_os_image.qcow2
+split.*
