@@ -149,7 +149,6 @@ struct nvme_ctrlr {
 	struct nvme_async_probe_ctx		*probe_ctx;
 
 	pthread_mutex_t				mutex;
-	uint32_t size;		// 修改ljx
 };
 
 struct nvme_bdev_ctrlr {

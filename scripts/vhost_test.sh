@@ -17,7 +17,7 @@ sudo ./scripts/rpc.py -s /var/tmp/nvmf.sock nvmf_subsystem_add_listener nqn.2016
 
 sudo ./scripts/rpc.py -s /var/tmp/nvmf.sock nvmf_subsystem_add_ns nqn.2016-06.io.spdk:cnode1 NVMe0n1
 
-# 启动 vhost 之后 连接存储端
+# 启动 vhost 之后 连接存储端 
 sudo ./scripts/rpc.py -s /var/tmp/vhost.sock bdev_nvme_attach_controller -b ump1_0 -t tcp -a 127.0.0.1 -f ipv4 -s 4420 -n "nqn.2016-06.io.spdk:cnode1"
 
 sudo ./scripts/rpc.py -s /var/tmp/vhost.sock bdev_nvme_attach_controller -b ump1_1 -t tcp -a 127.0.0.1 -f ipv4 -s 4421 -n "nqn.2016-06.io.spdk:cnode1"
@@ -74,7 +74,7 @@ sudo modprobe nbd
 # sudo ./scripts/rpc.py -s /var/tmp/vhost.sock bdev_nvme_attach_controller -b Nvme1 -t tcp -a 127.0.0.1 -f ipv4 -s 4421 -n "nqn.2016-06.io.spdk:cnode1"
 # # IO 下发端
 # sudo modprobe nbd
-# sudo ./scripts/rpc.py nbd_start_disk ump-bdev-00000000-0000-0000-0000-000000000000 /dev/nbd0
+# sudo ./scripts/rpc.py -s /var/tmp/vhost.sock nbd_start_disk ump-bdev-00000000-0000-0000-0000-000000000000 /dev/nbd0
 # # sudo fio -ioengine=libaio -bs=4k -direct=1 -thread -rw=randrw -filename=/dev/nbd0 -name="BS 4KB randrw test" -iodepth=16 -runtime=10
 # # 移除监听端口再连回去
 # sudo ./scripts/rpc.py -s /var/tmp/nvmf.sock nvmf_subsystem_remove_listener nqn.2016-06.io.spdk:cnode1 -t tcp -a 127.0.0.1 -f ipv4 -s 4421

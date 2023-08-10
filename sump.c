@@ -5,7 +5,7 @@ struct ump_bdev_manage ump_bdev_manage;
 /* 全局变量，保存真正处理设备注册的函数指针 */
 int (*real_spdk_bdev_register)(struct spdk_bdev *bdev);
 /* 全局变量，劫持_bdev_nvme_reset_complete函数，用于实现failback */
-int (*real_spdk_nvme_ctrlr_reconnect_poll_async)(struct spdk_nvme_ctrlr *ctrlr);
+// int (*real_spdk_nvme_ctrlr_reconnect_poll_async)(struct spdk_nvme_ctrlr *ctrlr);
 
 /***********************************************************************
  *******************************spdk函数劫持****************************
@@ -16,9 +16,9 @@ void __attribute__((constructor)) ump_init(void)
 {
     sump_printf("ump init start...\n");
     real_spdk_bdev_register = dlsym(RTLD_NEXT, "spdk_bdev_register");
-    real_spdk_nvme_ctrlr_reconnect_poll_async = dlsym(RTLD_NEXT, "spdk_nvme_ctrlr_reconnect_poll_async");
+    // real_spdk_nvme_ctrlr_reconnect_poll_async = dlsym(RTLD_NEXT, "spdk_nvme_ctrlr_reconnect_poll_async");
     sump_printf("real_spdk_bdev_register = %p.\n", real_spdk_bdev_register);
-    sump_printf("real_spdk_nvme_ctrlr_reconnect_poll_async = %p.\n", real_spdk_nvme_ctrlr_reconnect_poll_async);
+    // sump_printf("real_spdk_nvme_ctrlr_reconnect_poll_async = %p.\n", real_spdk_nvme_ctrlr_reconnect_poll_async);
     
     TAILQ_INIT(&g_ump_bdev_channels); // ljx
     printf("g_ump_bdev_iopaths:%p\n", &g_ump_bdev_channels);

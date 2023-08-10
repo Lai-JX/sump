@@ -219,8 +219,9 @@ struct ump_bdev_iopath
     // uint64_t io_time_read;                // io 时间
     // uint64_t io_time_write;               // io 时间
     bool reconnecting;						// 是否正在重连
-    struct time_queue io_read_time;
-    struct time_queue io_write_time;
+	struct spdk_poller *reconnect_poller;
+	struct time_queue io_read_time;
+	struct time_queue io_write_time;
     uint64_t id;
     uint64_t io_incomplete;                 // 未完成的io请求数
 };

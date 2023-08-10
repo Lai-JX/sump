@@ -79,7 +79,7 @@ struct ump_bdev_iopath *ump_bdev_find_iopath(struct ump_bdev_channel *ump_channe
     // iopath = ump_find_iopath_random_weight_static(ump_channel);
     iopath = ump_find_iopath_hash(ump_channel, bdev_io);
 
-    sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
+    // sump_printf("%s's IO channel is chosen\n", iopath->bdev->name);
     return iopath;
 }
 
@@ -500,6 +500,7 @@ void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io)
     // struct spdk_thread *thread = spdk_thread_create(thread_name, &tmp_cpumask);
 
     // 2. 启动线程
+    //
     struct ump_failback_ctx *ump_failback_ctx = malloc(sizeof(struct ump_failback_ctx));
 
     ump_failback_ctx->bdev_io = malloc(sizeof(struct spdk_bdev_io));
@@ -512,7 +513,7 @@ void ump_failback(struct ump_bdev_iopath *iopath, struct spdk_bdev_io *bdev_io)
     // ump_failback_ctx->addr = &ump_failback_ctx;
     // spdk_spin_init(&ump_failback_ctx->lock);    // 初始化自旋锁
     // ump_failback_ctx->poller = spdk_poller_register(ump_failback_io_fn, (void *)ump_failback_ctx, 10000); // 每10000微秒试一下是否已经重连
-    spdk_poller_register_named(ump_failback_io_fn, (void *)ump_failback_ctx, 1000000, "failback"); // 每10000微秒试一下是否已经重连
+    iopath->reconnect_poller = spdk_poller_register_named(ump_failback_io_fn, (void *)ump_failback_ctx, 1000000, "failback"); // 每10000微秒试一下是否已经重连
     // spdk_thread_send_msg(thread, ump_failback_io_fn, (void *)ump_failback_ctx);
 
     return;
@@ -558,18 +559,22 @@ void ump_failback_io_completion_cb(struct spdk_bdev_io *bdev_io, bool success, v
         struct spdk_thread *thread = spdk_get_thread();
         struct spdk_poller *poller;
 
-
-        RB_FOREACH(poller, timed_pollers_tree, &thread->timed_pollers) {
-            sump_printf("poller name:%s\n", poller->name);
-            if (strcmp(poller->name, "failback") == 0)
-            {
-                sump_printf("%s poller pause!\n", poller->name);
-                spdk_poller_pause(poller);
-                // spdk_poller_unregister(&poller);
-                free(bdev_io);
-                free(ump_failback_ctx);
-            }
-        }
+        spdk_poller_pause(ump_failback_ctx->iopath->reconnect_poller);
+        // spdk_poller_unregister(&(ump_failback_ctx->iopath->reconnect_poller));
+        free(bdev_io);
+        free(ump_failback_ctx);
+        // RB_FOREACH(poller, timed_pollers_tree, &thread->timed_pollers) {
+        //     sump_printf("poller name:%s\n", poller->name);
+        //     if (strcmp(poller->name, "failback") == 0)
+        //     {
+        //         sump_printf("%s poller pause!\n", poller->name);
+        //         // spdk_poller_pause(poller);
+        //         spdk_poller_unregister(&poller);
+        //         free(bdev_io);
+        //         free(ump_failback_ctx);
+        //         return;
+        //     }
+        // }
         // TAILQ_FOREACH(poller, &thread->active_pollers, tailq)
         // {
         //     printf("poller name:%s\n", poller->name);
